@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -767,6 +766,24 @@
     color: var(--navy);
     border-bottom-color: var(--navy);
   }
+
+  /* Sheet Upload & Import Animations */
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  @keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.85); } }
+  .spinner-inline {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .dot.pulsing {
+    animation: pulseDot 1s infinite ease-in-out;
+  }
 </style>
 </head>
 <body>
@@ -983,16 +1000,37 @@
     <div id="adminBankControls" style="display:none;">
       <!-- Excel Import -->
       <div class="card">
-        <h2>📥 Import Questions from Excel (Admin Only)</h2>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+          <h2 style="margin:0;">📥 Import Questions from Excel (Admin Only)</h2>
+          <div id="sheetUploadStatusBadge" class="status-pill">
+            <span class="dot" id="sheetUploadStatusDot"></span> <span id="sheetUploadStatusText">No Sheet Selected</span>
+          </div>
+        </div>
         <div class="note" style="margin-bottom:12px;font-size:0.84rem;color:var(--muted);">
-          Columns expected: <strong>Act</strong> | <strong>Chapter</strong> | <strong>Section/Regulation</strong> | <strong>Question</strong> | <strong>OptionA</strong> | <strong>OptionB</strong> | <strong>OptionC</strong> | <strong>OptionD</strong> | <strong>CorrectOption (A/B/C/D)</strong> | <strong>Explanation</strong>.
-          <br>Duplicate questions (matched by question text) are automatically skipped to preserve database cleanliness.
+          Columns expected: <strong>Act</strong> | <strong>Chapter</strong> | <strong>Section/Regulation</strong> | <strong>Question</strong> | <strong>OptionA</strong> | <strong>OptionB</strong> | <strong>OptionC</strong> | <strong>OptionD</strong> | <strong>CorrectOption (A/B/C/D)</strong> | <strong>Explanation</strong> (optional: <strong>QuestionID</strong>).
+          <br>Smart Deduplication: Questions are cross-checked against database records (by Question ID and normalized text). Existing questions are automatically skipped.
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
           <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="max-width:320px;">
           <button class="btn" id="importExcelBtn">Import Spreadsheet</button>
         </div>
-        <div id="importFeedback" class="note" style="margin-top:8px;font-weight:600;"></div>
+
+        <!-- Real-Time Upload & Verification Progress Bar -->
+        <div id="importProgressBarContainer" style="display:none;margin-top:12px;background:var(--surface-2);border-radius:99px;overflow:hidden;height:8px;border:1px solid var(--line);">
+          <div id="importProgressBar" style="width:0%;height:100%;background:var(--accent);transition:width 0.15s ease;"></div>
+        </div>
+
+        <!-- Detailed Feedback & Metrics Container -->
+        <div id="importFeedback" class="note" style="margin-top:10px;font-weight:600;min-height:20px;"></div>
+
+        <!-- Last Uploaded Sheet Info Box -->
+        <div id="lastUploadedSheetCard" style="display:none;margin-top:12px;padding:10px 14px;background:var(--paper);border:1px solid var(--line);border-radius:8px;font-size:0.82rem;color:var(--muted);">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+            <span><strong style="color:var(--navy-dark);">Recent Upload:</strong> <span id="lastUploadedFileName">-</span></span>
+            <span id="lastUploadedTimestamp" style="font-family:var(--mono);font-size:0.75rem;">-</span>
+          </div>
+          <div id="lastUploadedStats" style="margin-top:4px;color:var(--ink);"></div>
+        </div>
       </div>
 
       <!-- Single Question Manual Entry -->
@@ -6729,7 +6767,9 @@
     bank: [],
     history: [],
     activeExam: null,
-    timerInterval: null
+    timerInterval: null,
+    isImportingQuestions: false,
+    lastUploadedFileSignature: null
   };
 
   // Check if current session is logged in (cloud user or demo user)
@@ -7715,8 +7755,287 @@
   });
 
   // ==========================================================================
+  // ==========================================================================
   // 10. Question Bank Management (Admin Controls & View)
   // ==========================================================================
+
+  // Text normalization engine for robust duplicate checking
+  function normalizeQuestionText(str) {
+    if (!str) return '';
+    return String(str)
+      .trim()
+      .toLowerCase()
+      // Replace smart quotes with standard ASCII
+      .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+      .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
+      // Replace dashes/em-dashes with standard hyphen
+      .replace(/[\u2013\u2014\u2015]/g, '-')
+      .replace(/[\u2022\u25CF\u25CB]/g, ' ')
+      // Normalize non-breaking spaces and whitespace sequences
+      .replace(/[\u00A0\s]+/g, ' ')
+      // Strip leading question numbers and bullet symbols
+      .replace(/^(?:q(?:uestion)?[\s\.\-_]*\d+[\s\.\-_:\)]*|\(?\d+\)?[\.\-_:\)]+|[\s\-_:]+)\s*/i, '')
+      // Remove trailing punctuation or whitespace
+      .replace(/[\s\-_:]+$/, '')
+      .trim();
+  }
+
+  function hashQuestion(str) {
+    let hash = 5381;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) + hash) + str.charCodeAt(i);
+      hash = hash & hash;
+    }
+    return Math.abs(hash).toString(36);
+  }
+
+  // Fetch all known question IDs and normalized texts across local memory and cloud database
+  async function getAllExistingQuestionKeys() {
+    const existingIds = new Set();
+    const existingNormTexts = new Set();
+
+    // 1. In-memory bank
+    if (state.bank && Array.isArray(state.bank)) {
+      state.bank.forEach(q => {
+        if (q.id) existingIds.add(String(q.id).trim().toLowerCase());
+        const norm = normalizeQuestionText(q.text);
+        if (norm) {
+          existingNormTexts.add(norm);
+          if (q.chapter) existingNormTexts.add(norm + '_' + String(q.chapter).trim().toLowerCase());
+        }
+      });
+    }
+
+    // 2. Local storage cache
+    try {
+      const raw = localStorage.getItem(LOCAL_BANK_KEY);
+      if (raw) {
+        const stored = JSON.parse(raw);
+        if (Array.isArray(stored)) {
+          stored.forEach(q => {
+            if (q.id) existingIds.add(String(q.id).trim().toLowerCase());
+            const norm = normalizeQuestionText(q.text);
+            if (norm) {
+              existingNormTexts.add(norm);
+              if (q.chapter) existingNormTexts.add(norm + '_' + String(q.chapter).trim().toLowerCase());
+            }
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Could not check local storage keys:", e);
+    }
+
+    // 3. Supabase Cloud Database (paginated to ensure complete coverage)
+    if (state.isCloud && state.supabase) {
+      let from = 0;
+      const step = 1000;
+      while (true) {
+        try {
+          const { data, error } = await state.supabase
+            .from('questions')
+            .select('id, text, chapter')
+            .range(from, from + step - 1);
+          if (error) {
+            console.warn("Cloud question keys fetch warning:", error.message);
+            break;
+          }
+          if (!data || data.length === 0) break;
+          data.forEach(q => {
+            if (q.id) existingIds.add(String(q.id).trim().toLowerCase());
+            const norm = normalizeQuestionText(q.text);
+            if (norm) {
+              existingNormTexts.add(norm);
+              if (q.chapter) existingNormTexts.add(norm + '_' + String(q.chapter).trim().toLowerCase());
+            }
+          });
+          if (data.length < step) break;
+          from += step;
+        } catch (err) {
+          console.warn("Exception fetching cloud keys:", err);
+          break;
+        }
+      }
+    }
+
+    return { existingIds, existingNormTexts };
+  }
+
+  // Save new questions in batches of 50 for optimal performance
+  async function saveQuestionsBatch(questionsList, progressCallback) {
+    if (!questionsList || questionsList.length === 0) return true;
+
+    if (state.isCloud && state.supabase) {
+      if (!isAdmin()) {
+        showToast("Access Denied: Only administrators can modify questions.");
+        return false;
+      }
+
+      const BATCH_SIZE = 50;
+      for (let i = 0; i < questionsList.length; i += BATCH_SIZE) {
+        const chunk = questionsList.slice(i, i + BATCH_SIZE);
+        const payload = chunk.map(q => ({
+          id: q.id,
+          act: q.act,
+          chapter: q.chapter,
+          section: q.section,
+          text: q.text,
+          options: q.options,
+          correct: q.correct,
+          explain: q.explain,
+          created_by: state.user ? state.user.id : null
+        }));
+
+        let { error } = await state.supabase.from('questions').upsert(payload, { onConflict: 'id' });
+        if (error) {
+          const res = await state.supabase.from('questions').insert(payload);
+          if (res.error) {
+            console.error("Batch insert error:", res.error);
+            throw new Error(`Cloud batch insert failed at row ${i + 1}: ${res.error.message}`);
+          }
+        }
+
+        if (typeof progressCallback === 'function') {
+          progressCallback(Math.min(i + chunk.length, questionsList.length), questionsList.length);
+        }
+      }
+
+      state.bank = [...questionsList, ...state.bank];
+      saveLocalBank();
+      return true;
+    }
+
+    // Local Storage Mode
+    state.bank = [...questionsList, ...state.bank];
+    saveLocalBank();
+    if (typeof progressCallback === 'function') {
+      progressCallback(questionsList.length, questionsList.length);
+    }
+    return true;
+  }
+
+  // Upload UI helpers
+  function updateImportStatus(type, message, details) {
+    const badge = document.getElementById('sheetUploadStatusBadge');
+    const badgeDot = document.getElementById('sheetUploadStatusDot');
+    const badgeText = document.getElementById('sheetUploadStatusText');
+    const feedback = document.getElementById('importFeedback');
+
+    if (!badge || !badgeText || !feedback) return;
+
+    badgeDot.classList.remove('pulsing');
+
+    if (type === 'no-file') {
+      badge.className = 'status-pill';
+      badge.style.background = '';
+      badge.style.color = '';
+      badge.style.borderColor = '';
+      badgeText.textContent = 'No Sheet Selected';
+      feedback.textContent = message || '';
+      feedback.style.color = 'var(--muted)';
+    } else if (type === 'ready') {
+      badge.className = 'status-pill';
+      badge.style.background = '#eff6ff';
+      badge.style.color = '#1e40af';
+      badge.style.borderColor = '#bfdbfe';
+      badgeText.innerHTML = details || 'Ready to Upload';
+      feedback.textContent = message || '';
+      feedback.style.color = 'var(--navy)';
+    } else if (type === 'uploading') {
+      badge.className = 'status-pill';
+      badge.style.background = '#fef3c7';
+      badge.style.color = '#92400e';
+      badge.style.borderColor = '#fde68a';
+      badgeDot.classList.add('pulsing');
+      badgeText.textContent = 'Uploading & Verifying...';
+      feedback.textContent = message || 'Processing spreadsheet...';
+      feedback.style.color = 'var(--brass-dark)';
+    } else if (type === 'success') {
+      badge.className = 'status-pill online';
+      badge.style.background = '#ecfdf5';
+      badge.style.color = '#065f46';
+      badge.style.borderColor = '#a7f3d0';
+      badgeText.textContent = 'Sheet Uploaded Successfully';
+      feedback.textContent = message || '';
+      feedback.style.color = 'var(--good)';
+    } else if (type === 'already-uploaded') {
+      badge.className = 'status-pill';
+      badge.style.background = '#f1f5f9';
+      badge.style.color = '#334155';
+      badge.style.borderColor = '#cbd5e1';
+      badgeText.textContent = 'Sheet Up-to-Date (In DB)';
+      feedback.textContent = message || '';
+      feedback.style.color = 'var(--navy)';
+    } else if (type === 'error') {
+      badge.className = 'status-pill';
+      badge.style.background = '#fef2f2';
+      badge.style.color = '#991b1b';
+      badge.style.borderColor = '#fecaca';
+      badgeText.textContent = 'Upload Failed';
+      feedback.textContent = message || '';
+      feedback.style.color = 'var(--bad)';
+    }
+  }
+
+  function showProgressBar(show) {
+    const bar = document.getElementById('importProgressBarContainer');
+    if (bar) bar.style.display = show ? 'block' : 'none';
+  }
+
+  function updateProgressBar(percent) {
+    const bar = document.getElementById('importProgressBar');
+    if (bar) bar.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+  }
+
+  function recordUploadHistory(filename, added, skippedDup, skippedBad) {
+    try {
+      const now = new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+      const record = { filename, added, skippedDup, skippedBad, timestamp: now };
+      localStorage.setItem('cblr_last_uploaded_sheet', JSON.stringify(record));
+      displayUploadHistory(record);
+    } catch (e) {
+      console.warn("Could not save upload history:", e);
+    }
+  }
+
+  function displayUploadHistory(record) {
+    if (!record) return;
+    const card = document.getElementById('lastUploadedSheetCard');
+    const nameEl = document.getElementById('lastUploadedFileName');
+    const timeEl = document.getElementById('lastUploadedTimestamp');
+    const statsEl = document.getElementById('lastUploadedStats');
+    if (card && nameEl && timeEl && statsEl) {
+      nameEl.textContent = record.filename;
+      timeEl.textContent = record.timestamp;
+      statsEl.innerHTML = `<strong>Result:</strong> ${record.added} added · ${record.skippedDup} duplicate(s) skipped · ${record.skippedBad} invalid row(s) skipped.`;
+      card.style.display = 'block';
+    }
+  }
+
+  // Restore previous upload record on load if present
+  try {
+    const savedUploadRecord = localStorage.getItem('cblr_last_uploaded_sheet');
+    if (savedUploadRecord) {
+      displayUploadHistory(JSON.parse(savedUploadRecord));
+    }
+  } catch(e) {}
+
+  // File picker change listener
+  document.getElementById('excelFileInput')?.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const sizeKb = (file.size / 1024).toFixed(1);
+      updateImportStatus('ready', 
+        `File selected: "${file.name}" (${sizeKb} KB). Click "Import Spreadsheet" to check for duplicates and upload.`,
+        `📄 Ready: <strong>${escapeHtml(file.name)}</strong> (${sizeKb} KB)`
+      );
+      showProgressBar(false);
+    } else {
+      updateImportStatus('no-file', '');
+      showProgressBar(false);
+    }
+  });
+
   document.getElementById('addQuestionBtn').addEventListener('click', async () => {
     if (!isAdmin()) {
       showToast("Only administrators can add questions.");
@@ -7737,6 +8056,15 @@
     if (!act || !chapter || !text || !optA || !optB || !optC || !optD) {
       feedback.textContent = 'Please fill in Act, Chapter, Question text, and all four options.';
       feedback.style.color = 'var(--bad)';
+      return;
+    }
+
+    const normText = normalizeQuestionText(text);
+    const existing = state.bank.find(q => normalizeQuestionText(q.text) === normText);
+    if (existing) {
+      feedback.textContent = `Duplicate detected: This question already exists in repository under ${existing.act} (${existing.chapter}).`;
+      feedback.style.color = 'var(--bad)';
+      showToast("Question already exists in database.");
       return;
     }
 
@@ -7768,85 +8096,164 @@
       showToast("Only administrators can import questions.");
       return;
     }
+
+    if (state.isImportingQuestions) {
+      showToast("An import is already in progress. Please wait.");
+      return;
+    }
+
     const fileInput = document.getElementById('excelFileInput');
-    const feedback = document.getElementById('importFeedback');
+    const importBtn = document.getElementById('importExcelBtn');
     const file = fileInput.files[0];
 
     if (!file) {
-      feedback.textContent = 'Please choose a .xlsx or .xls file first.';
-      feedback.style.color = 'var(--bad)';
+      updateImportStatus('no-file', 'Please choose a .xlsx or .xls file first.');
       return;
     }
     if (typeof XLSX === 'undefined') {
-      feedback.textContent = 'SheetJS library is not available. Check your internet connection.';
-      feedback.style.color = 'var(--bad)';
+      updateImportStatus('error', 'SheetJS library is not available. Check your internet connection.');
       return;
     }
+
+    // Guard against multiple duplicate uploads of the exact same file without changing
+    const fileSig = `${file.name}_${file.size}_${file.lastModified}`;
+    if (state.lastUploadedFileSignature === fileSig) {
+      const reimport = confirm(`The file "${file.name}" was just imported. Do you want to re-scan it for any missing questions?`);
+      if (!reimport) return;
+    }
+
+    // Lock UI and show active importing indicator
+    state.isImportingQuestions = true;
+    importBtn.disabled = true;
+    fileInput.disabled = true;
+    importBtn.innerHTML = '<span class="spinner-inline"></span> Importing...';
+    showProgressBar(true);
+    updateProgressBar(10);
+    updateImportStatus('uploading', `Reading "${file.name}"...`);
 
     const reader = new FileReader();
     reader.onload = async function(e) {
       try {
+        updateImportStatus('uploading', 'Parsing spreadsheet data...');
+        updateProgressBar(25);
+
         const data = new Uint8Array(e.target.result);
         const wb = XLSX.read(data, { type: 'array' });
         const sheet = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
 
         if (!rows || rows.length === 0) {
-          feedback.textContent = 'No records found in spreadsheet.';
-          feedback.style.color = 'var(--bad)';
+          updateImportStatus('error', 'No data rows found in spreadsheet.');
+          showToast("Spreadsheet is empty.");
           return;
         }
 
-        const existingTexts = new Set(state.bank.map(q => q.text.trim().toLowerCase()));
-        let added = 0, skippedDup = 0, skippedBad = 0;
-        const optMap = { A: 0, B: 1, C: 2, D: 3, a: 0, b: 1, c: 2, d: 3, 0: 0, 1: 1, 2: 2, 3: 3 };
+        updateImportStatus('uploading', `Checking ${rows.length} questions against database for duplicates...`);
+        updateProgressBar(40);
 
-        for (const row of rows) {
+        const { existingIds, existingNormTexts } = await getAllExistingQuestionKeys();
+        updateProgressBar(55);
+
+        let skippedDup = 0, skippedBad = 0;
+        const optMap = { A: 0, B: 1, C: 2, D: 3, a: 0, b: 1, c: 2, d: 3, 0: 0, 1: 1, 2: 2, 3: 3 };
+        const toAdd = [];
+
+        for (let rIdx = 0; rIdx < rows.length; rIdx++) {
+          const row = rows[rIdx];
           const act = String(row['Act'] || '').trim();
           const chapter = String(row['Chapter'] || '').trim();
           const section = String(row['Section/Regulation'] || row['Section'] || row['Regulation'] || 'General').trim();
-          const text = String(row['Question'] || '').trim();
-          const optA = String(row['OptionA'] || '').trim();
-          const optB = String(row['OptionB'] || '').trim();
-          const optC = String(row['OptionC'] || '').trim();
-          const optD = String(row['OptionD'] || '').trim();
-          const correctRaw = String(row['CorrectOption'] || '').trim();
-          const explain = String(row['Explanation'] || '').trim();
+          const text = String(row['Question'] || row['text'] || '').trim();
+          const optA = String(row['OptionA'] || row['Option A'] || '').trim();
+          const optB = String(row['OptionB'] || row['Option B'] || '').trim();
+          const optC = String(row['OptionC'] || row['Option C'] || '').trim();
+          const optD = String(row['OptionD'] || row['Option D'] || '').trim();
+          const correctRaw = String(row['CorrectOption'] || row['Correct'] || '').trim();
+          const explain = String(row['Explanation'] || row['explain'] || '').trim();
+          const rowQuestionId = String(row['QuestionID'] || row['Question Id'] || row['id'] || row['ID'] || '').trim();
 
           if (!act || !chapter || !text || !optA || !optB || !optC || !optD || !(correctRaw in optMap)) {
             skippedBad++;
             continue;
           }
 
-          if (existingTexts.has(text.toLowerCase())) {
+          const normText = normalizeQuestionText(text);
+          let isDup = false;
+          if (rowQuestionId && existingIds.has(rowQuestionId.toLowerCase())) {
+            isDup = true;
+          } else if (!rowQuestionId && normText && existingNormTexts.has(normText)) {
+            isDup = true;
+          } else if (normText && chapter && existingNormTexts.has(normText + '_' + chapter.toLowerCase())) {
+            isDup = true;
+          }
+
+          if (isDup) {
             skippedDup++;
             continue;
           }
 
+          // Mark as seen immediately so duplicates inside the same file are detected
+          if (rowQuestionId) existingIds.add(rowQuestionId.toLowerCase());
+          if (normText) {
+            existingNormTexts.add(normText);
+            if (chapter) existingNormTexts.add(normText + '_' + chapter.toLowerCase());
+          }
+
+          const assignedId = rowQuestionId || `q-${hashQuestion(normText || text)}-${rIdx}`;
           const newQ = tagQuestion({
+            id: assignedId,
             act, chapter, section, text,
             options: [optA, optB, optC, optD],
             correct: optMap[correctRaw],
             explain
           });
 
-          await saveQuestion(newQ);
-          existingTexts.add(text.toLowerCase());
-          added++;
+          toAdd.push(newQ);
         }
 
-        refreshHierarchyDropdowns();
-        renderBankList();
-        updateDashboard();
+        updateProgressBar(65);
 
-        feedback.textContent = `Import Complete: Added ${added} questions. (Skipped ${skippedDup} duplicate(s), ${skippedBad} invalid row(s)).`;
-        feedback.style.color = 'var(--good)';
-        fileInput.value = '';
-        showToast(`Imported ${added} questions.`);
+        if (toAdd.length === 0) {
+          updateProgressBar(100);
+          state.lastUploadedFileSignature = fileSig;
+          recordUploadHistory(file.name, 0, skippedDup, skippedBad);
+          updateImportStatus('already-uploaded', 
+            `Sheet Already in Database: All ${skippedDup} valid question(s) already exist in the central repository. 0 duplicates added (${skippedBad} invalid row(s) skipped).`
+          );
+          showToast(`All ${skippedDup} questions already exist.`);
+          return;
+        }
+
+        updateImportStatus('uploading', `Uploading ${toAdd.length} new question(s) to repository...`);
+        await saveQuestionsBatch(toAdd, (done, total) => {
+          const pct = 65 + Math.floor((done / total) * 33);
+          updateProgressBar(pct);
+          updateImportStatus('uploading', `Uploading new questions: ${done} / ${total} saved...`);
+        });
+
+        updateProgressBar(100);
+        refreshHierarchyDropdowns();
+        renderBankList(true);
+        updateDashboard();
+        if (isAdmin()) renderAdminDashboard();
+
+        state.lastUploadedFileSignature = fileSig;
+        recordUploadHistory(file.name, toAdd.length, skippedDup, skippedBad);
+
+        updateImportStatus('success', 
+          `Import Complete: Successfully added ${toAdd.length} new question(s). Skipped ${skippedDup} duplicate(s) & ${skippedBad} invalid row(s). Total in repository: ${state.bank.length}.`
+        );
+        showToast(`Imported ${toAdd.length} questions.`);
       } catch (err) {
         console.error("Import error:", err);
-        feedback.textContent = 'Could not parse file. Ensure valid .xlsx format.';
-        feedback.style.color = 'var(--bad)';
+        updateImportStatus('error', `Import Error: ${err.message || 'Could not parse Excel file.'}`);
+        showToast("Import failed: " + (err.message || "Unknown error"));
+      } finally {
+        state.isImportingQuestions = false;
+        importBtn.disabled = false;
+        fileInput.disabled = false;
+        importBtn.textContent = 'Import Spreadsheet';
+        setTimeout(() => { showProgressBar(false); }, 2000);
       }
     };
     reader.readAsArrayBuffer(file);
