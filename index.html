@@ -1856,10 +1856,9 @@
     <button data-tab="admin" id="adminTabBtn" class="admin-tab" style="display:none;">👑 Admin Console</button>
   </nav>
 
-  <!-- ==================== AUTH MODAL (OPTIONAL CLOUD SYNC & LOGIN) ==================== -->
+  <!-- ==================== AUTH GATE (MANDATORY LOGIN) ==================== -->
   <div id="authGate" class="auth-modal-overlay" style="display:none;">
     <div class="auth-gate-card" style="position:relative;">
-      <button class="modal-close-btn" id="gateCloseBtn" type="button" title="Close / Dismiss">✕</button>
       <div style="text-align:center;margin-bottom:18px;border-bottom:1px solid var(--line);padding-bottom:16px;">
         <div style="font-size:1.35rem;font-weight:800;color:var(--navy);line-height:1.25;">
           🏛️ CBLR Rule 6 Exam — Preparation Portal
@@ -1871,9 +1870,9 @@
 
       <div class="auth-gate-header" style="margin-top:0;">
         <div class="auth-gate-icon">🔐</div>
-        <div class="auth-gate-title">Connect Cloud Account</div>
+        <div class="auth-gate-title">Examinee Authentication</div>
         <p class="auth-gate-subtitle">
-          Sign in or create an account to back up your test attempts, weak-point diagnostics, and revision bookmarks to the cloud. You can also practice locally without logging in!
+          Please sign in or create an account to access the syllabus drills, 1,200+ question bank, study materials, and your personal mock exam records.
         </p>
       </div>
 
@@ -23547,14 +23546,9 @@
       email: initialStoredSession.email || candProfile.email,
       role: initialStoredSession.role || candProfile.role,
       full_name: initialStoredSession.fullName || candProfile.name
-    } : {
-      id: candProfile.id,
-      email: candProfile.email,
-      role: candProfile.role,
-      full_name: candProfile.name
-    },
+    } : null,
     demoRole: (initialStoredSession && initialStoredSession.role) ? initialStoredSession.role : 'user',
-    demoLoggedIn: true, // Always true for instant frictionless examinee access
+    demoLoggedIn: Boolean(initialStoredSession && initialStoredSession.loggedIn),
     bank: [],
     history: [],
     activeExam: null,
@@ -23621,9 +23615,11 @@
     }
   }
 
-  // Frictionless Examinee Access: Visitors can immediately practice with zero login barrier
+  // Examinee Access Authentication Check: Content visible only after login
   function isLoggedIn() {
-    return true;
+    const isCloudUser = Boolean(state.isCloud && state.user);
+    const storedSess = getPortalSession();
+    return Boolean(isCloudUser || (storedSess && storedSess.loggedIn) || (state.demoLoggedIn && state.profile));
   }
 
   // Safe UI Toast Notification
@@ -23795,18 +23791,11 @@
           await loadData();
         } else if (event === 'SIGNED_OUT') {
           state.user = null;
-          const cand = getCandidateProfile();
-          state.profile = {
-            id: cand.id,
-            email: cand.email,
-            role: 'user',
-            full_name: cand.name
-          };
-          state.demoLoggedIn = true;
+          state.profile = null;
+          state.demoLoggedIn = false;
           savePortalSession(null);
           updateUserInterface();
-          await loadData();
-          showToast("Switched to Local Candidate Mode.");
+          showToast("Signed out. Please log in to continue.");
         }
       });
 
@@ -23836,15 +23825,20 @@
     state.isCloud = false;
     state.supabase = null;
     state.user = null;
-    const cand = getCandidateProfile();
-    state.demoLoggedIn = true;
-    state.demoRole = 'user';
-    state.profile = {
-      id: cand.id,
-      email: cand.email,
-      role: 'user',
-      full_name: cand.name
-    };
+    const stored = getPortalSession();
+    if (stored && stored.loggedIn) {
+      state.demoLoggedIn = true;
+      state.demoRole = stored.role || 'user';
+      state.profile = {
+        id: stored.userId || 'local-user',
+        email: stored.email || 'candidate@cblr.local',
+        role: stored.role || 'user',
+        full_name: stored.fullName || 'Candidate'
+      };
+    } else {
+      state.demoLoggedIn = false;
+      state.profile = null;
+    }
     const statusBadge = document.getElementById('cloudStatusBadge');
     const statusText = document.getElementById('cloudStatusText');
     if (statusBadge) statusBadge.className = "status-pill local";
@@ -24137,8 +24131,26 @@
     const bankCandidateNotice = document.getElementById('bankCandidateNotice');
     const demoRoleBar = document.getElementById('demoRoleBar');
     const userStateArea = document.getElementById('userStateArea');
+    const authGateEl = document.getElementById('authGate');
 
-    // Frictionless Access: Always reveal masthead & navigation tabs
+    const authenticated = isLoggedIn();
+
+    // Gated Portal Protection: If not logged in, completely hide masthead, nav tabs, and views
+    if (!authenticated) {
+      if (masthead) masthead.style.display = 'none';
+      if (tabsNav) tabsNav.style.display = 'none';
+      if (demoRoleBar) demoRoleBar.style.display = 'none';
+      document.getElementById('setupTab').style.display = 'none';
+      document.getElementById('bankTab').style.display = 'none';
+      document.getElementById('historyTab').style.display = 'none';
+      document.getElementById('materialsTab').style.display = 'none';
+      document.getElementById('adminTab').style.display = 'none';
+      if (authGateEl) authGateEl.style.display = 'flex';
+      return;
+    }
+
+    // Authenticated Access: Reveal masthead & navigation tabs
+    if (authGateEl) authGateEl.style.display = 'none';
     if (masthead) masthead.style.display = 'flex';
     if (tabsNav) tabsNav.style.display = 'inline-flex';
 
@@ -24176,7 +24188,7 @@
       }
     }
 
-    // Demo Bar visibility
+    // Demo Bar visibility (only shown when authenticated in local sandbox)
     if (!state.isCloud && state.demoLoggedIn) {
       demoRoleBar.style.display = 'flex';
       const toggleBtn = document.getElementById('toggleDemoAdminBtn');
@@ -24191,38 +24203,25 @@
       demoRoleBar.style.display = 'none';
     }
 
-    // Header Account Area
+    // Header Account Area: Displays active examinee badge and Logout button
     const isCloudUser = Boolean(state.isCloud && state.user);
-    const storedSess = getPortalSession();
-    const isExplicitlyLoggedIn = Boolean(isCloudUser || (storedSess && storedSess.loggedIn));
     const email = isCloudUser ? state.user.email : (state.profile?.full_name || state.profile?.email || 'Candidate');
     const isAdminUser = role === 'admin';
 
-    if (isExplicitlyLoggedIn || state.demoLoggedIn) {
-      userStateArea.innerHTML = `
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span class="role-badge ${isAdminUser ? 'admin' : 'user'}">
-            ${isAdminUser ? '👑 Admin' : (isCloudUser ? '☁️ Cloud' : '👤 Candidate')}
-          </span>
-          <span style="font-size:0.82rem;font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(email)}">
-            ${escapeHtml(email)}
-          </span>
-          <button class="btn sm outline" id="signOutBtn" title="Logout / Sign Out" style="border-color:#fca5a5;color:#b91c1c;background:#fff5f5;">
-            🚪 Logout
-          </button>
-        </div>
-      `;
-      document.getElementById('signOutBtn')?.addEventListener('click', handleSignOut);
-    } else {
-      userStateArea.innerHTML = `
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button class="btn sm outline" id="openAuthModalBtn" title="Sign In to Portal" style="border-color:#bfdbfe;color:#1e40af;background:#eff6ff;">
-            🔐 Sign In / Login
-          </button>
-        </div>
-      `;
-      document.getElementById('openAuthModalBtn')?.addEventListener('click', openAuthModal);
-    }
+    userStateArea.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="role-badge ${isAdminUser ? 'admin' : 'user'}">
+          ${isAdminUser ? '👑 Admin' : (isCloudUser ? '☁️ Cloud' : '👤 Candidate')}
+        </span>
+        <span style="font-size:0.82rem;font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(email)}">
+          ${escapeHtml(email)}
+        </span>
+        <button class="btn sm outline" id="signOutBtn" title="Logout / Sign Out" style="border-color:#fca5a5;color:#b91c1c;background:#fff5f5;">
+          🚪 Logout
+        </button>
+      </div>
+    `;
+    document.getElementById('signOutBtn')?.addEventListener('click', handleSignOut);
   }
 
   function openAuthModal() {
@@ -24231,6 +24230,10 @@
   }
 
   function closeAuthModal() {
+    if (!isLoggedIn()) {
+      // Prevent closing auth modal when not logged in
+      return;
+    }
     const el = document.getElementById('authGate');
     if (el) el.style.display = 'none';
   }
@@ -26258,10 +26261,12 @@
     showToast(`Revision drill launched with ${bookmarked.length} bookmarked question(s)!`);
   });
 
-  // Auth Modal Dialog Dismissal
-  document.getElementById('gateCloseBtn')?.addEventListener('click', closeAuthModal);
+  // Auth Modal Dialog Dismissal (Only dismissible if already authenticated)
+  document.getElementById('gateCloseBtn')?.addEventListener('click', () => {
+    if (isLoggedIn()) closeAuthModal();
+  });
   document.getElementById('authGate')?.addEventListener('click', (e) => {
-    if (e.target.id === 'authGate') closeAuthModal();
+    if (e.target.id === 'authGate' && isLoggedIn()) closeAuthModal();
   });
 
   // Export Bank & History
