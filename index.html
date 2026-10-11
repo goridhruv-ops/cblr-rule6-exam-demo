@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CBLR Rule 6 Exam — Preparation Portal (by Dhruv Gori)</title>
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CBLR Rule 6">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#1e3a8a">
 <!-- SheetJS for Excel Import/Export -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <!-- Supabase JS Client v2 -->
@@ -1602,6 +1610,219 @@
     margin: 18px 0;
     flex-wrap: wrap;
   }
+
+  /* ==================== STUDY MATERIAL TAB STYLES ==================== */
+  .materials-header-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .materials-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .materials-header-top h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    color: var(--navy-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .materials-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .mat-search-bar {
+    position: relative;
+    margin-bottom: 14px;
+  }
+  .mat-search-input {
+    width: 100%;
+    padding: 11px 16px 11px 38px;
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-sm);
+    font-size: 0.92rem;
+    background: var(--panel);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    box-sizing: border-box;
+  }
+  .mat-search-input:focus {
+    outline: none;
+    border-color: var(--navy-light);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  }
+  .mat-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 0.95rem;
+    pointer-events: none;
+  }
+  .mat-filter-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .mat-filter-pill {
+    background: var(--surface-2);
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+  .mat-filter-pill:hover {
+    background: #e2e8f0;
+    color: var(--ink);
+  }
+  .mat-filter-pill.active {
+    background: var(--navy);
+    color: #ffffff;
+    border-color: var(--navy);
+    box-shadow: 0 2px 6px rgba(30, 58, 138, 0.25);
+  }
+  .materials-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .mat-item-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .mat-item-card:hover {
+    border-color: #93c5fd;
+    box-shadow: var(--shadow);
+    transform: translateY(-1px);
+  }
+  .mat-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .mat-item-title-group {
+    flex: 1;
+    min-width: 260px;
+  }
+  .mat-item-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .mat-badge-cat {
+    background: var(--accent-soft);
+    color: var(--navy-light);
+    border: 1px solid #bfdbfe;
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.02em;
+  }
+  .mat-badge-type {
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .mat-badge-type.link {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+  }
+  .mat-badge-type.file {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+  .mat-badge-domain {
+    background: var(--surface-2);
+    color: var(--muted);
+    border: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+  }
+  .mat-item-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--navy-dark);
+    margin: 0;
+    line-height: 1.35;
+  }
+  .mat-item-desc {
+    font-size: 0.88rem;
+    color: #475569;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .mat-item-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .mat-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .mat-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .mat-empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--panel);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+    color: var(--muted);
+  }
+  .mat-empty-state-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+  }
 </style>
 </head>
 <body>
@@ -1627,6 +1848,7 @@
     <button data-tab="setup" class="active">Setup &amp; Quick Drills</button>
     <button data-tab="bank">Question Bank</button>
     <button data-tab="history">History &amp; Error Log</button>
+    <button data-tab="materials">📚 Study Material</button>
     <button data-tab="admin" id="adminTabBtn" class="admin-tab" style="display:none;">👑 Admin Console</button>
   </nav>
 
@@ -2033,6 +2255,76 @@
       <p style="font-size:0.85rem;color:var(--muted);margin-top:0;">Clears all saved attempt records for your profile on this device or cloud account.</p>
       <button class="btn danger" id="clearHistoryBtn">Clear My Attempt History</button>
     </div>
+  </div>
+
+  <!-- ==================== STUDY MATERIAL TAB ==================== -->
+  <div id="materialsTab" style="display:none;">
+
+    <!-- Study Material Masthead Card -->
+    <div class="materials-header-card">
+      <div class="materials-header-top">
+        <div>
+          <h2>📚 CBLR Rule 6 — Study Material &amp; Bare Acts Library</h2>
+          <p style="font-size:0.86rem;color:var(--muted);margin:4px 0 0 0;">
+            Comprehensive repository of statutory notifications, bare acts, valuation rules, and candidate study notes.
+          </p>
+        </div>
+        <div class="materials-actions">
+          <button class="btn brass" id="openShareLinkBtn" type="button">
+            + Share Study Material Link
+          </button>
+          <button class="btn accent" id="openAdminUploadDocBtn" type="button" style="display:none;">
+            📤 Admin: Upload PDF / Document
+          </button>
+        </div>
+      </div>
+
+      <!-- Statistics KPI Grid -->
+      <div class="dashboard-grid" style="margin-bottom:18px;">
+        <div class="stat-card">
+          <div class="label">Total Materials</div>
+          <div class="value" id="matStatTotal">0</div>
+          <div class="hint">Active indexed resources</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Statutory References</div>
+          <div class="value" id="matStatOfficial">0</div>
+          <div class="hint">Official CBIC &amp; DGFT publications</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Community Links</div>
+          <div class="value" id="matStatCommunity">0</div>
+          <div class="hint">Examinee shared study links</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Repository Status</div>
+          <div class="value" id="matStatStatus" style="font-size:1.15rem;color:var(--good);display:flex;align-items:center;gap:6px;">
+            <span>🟢 Public</span>
+          </div>
+          <div class="hint">Open to all candidates</div>
+        </div>
+      </div>
+
+      <!-- Live Search Bar -->
+      <div class="mat-search-bar">
+        <span class="mat-search-icon">🔍</span>
+        <input type="text" id="matSearchInput" class="mat-search-input" placeholder="Search by title, act, regulation, circular, keyword, or contributor...">
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="mat-filter-pills" id="matFilterPills">
+        <button class="mat-filter-pill active" data-cat="all" type="button">All</button>
+        <button class="mat-filter-pill" data-cat="Customs Act 1962" type="button">Customs Act 1962</button>
+        <button class="mat-filter-pill" data-cat="CBLR 2018" type="button">CBLR 2018</button>
+        <button class="mat-filter-pill" data-cat="Valuation Rules" type="button">Valuation Rules</button>
+        <button class="mat-filter-pill" data-cat="Foreign Trade Policy" type="button">Foreign Trade Policy</button>
+        <button class="mat-filter-pill" data-cat="Allied Acts" type="button">Allied Acts</button>
+        <button class="mat-filter-pill" data-cat="Question Bank Solutions" type="button">Question Bank Solutions</button>
+      </div>
+    </div>
+
+    <!-- Cards Container -->
+    <div id="materialsList" class="materials-list-container"></div>
   </div>
 
   <!-- ==================== ADMIN CONSOLE TAB (Admin Only) ==================== -->
@@ -2550,6 +2842,88 @@
       <button class="btn brass" id="copySchemaBtn">📋 Copy SQL Schema</button>
       <span class="note" id="schemaCopyMsg"></span>
     </div>
+  </div>
+</div>
+
+<!-- ==================== REGULAR USER STUDY MATERIAL LINK SHARE MODAL ==================== -->
+<div class="modal-backdrop" id="linkShareModal">
+  <div class="modal" style="max-width:540px;">
+    <button class="modal-close" id="closeLinkShareModalBtn" type="button" aria-label="Close Modal">&times;</button>
+    <h3>🔗 Share Study Material Link</h3>
+    <p style="font-size:0.85rem;color:var(--muted);margin-top:-6px;">
+      Share high-yield statutory bare act links, CBIC notifications, or conceptual revision notes with fellow examinees.
+    </p>
+
+    <form id="linkShareForm" onsubmit="return false;">
+      <label for="shareLinkTitle">Resource Title <span style="color:var(--bad);">*</span></label>
+      <input type="text" id="shareLinkTitle" placeholder="e.g. Customs Valuation Rules 2007 Summary Notes" required>
+
+      <label for="shareLinkCategory">Category / Law Topic <span style="color:var(--bad);">*</span></label>
+      <select id="shareLinkCategory" required>
+        <option value="Customs Act 1962">Customs Act 1962</option>
+        <option value="CBLR 2018" selected>CBLR 2018</option>
+        <option value="Valuation Rules">Valuation Rules</option>
+        <option value="Foreign Trade Policy">Foreign Trade Policy</option>
+        <option value="Allied Acts">Allied Acts</option>
+        <option value="Question Bank Solutions">Question Bank Solutions</option>
+      </select>
+
+      <label for="shareLinkUrl">Resource Link URL <span style="color:var(--bad);">*</span></label>
+      <input type="url" id="shareLinkUrl" placeholder="https://www.cbic.gov.in/..." required>
+
+      <label for="shareLinkDesc">Short Preview / Conceptual Notes description</label>
+      <textarea id="shareLinkDesc" rows="3" placeholder="Key concepts, circular numbers, or statutory sections covered..."></textarea>
+
+      <label for="shareLinkContributor">Contributor Name / Identification</label>
+      <input type="text" id="shareLinkContributor" placeholder="e.g. Adv. Rajesh Sharma or Roll No. (Optional)">
+
+      <div id="shareLinkFeedback" class="note" style="margin-top:10px;min-height:18px;"></div>
+
+      <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn outline" id="cancelLinkShareBtn" type="button">Cancel</button>
+        <button class="btn brass" id="submitLinkShareBtn" type="button">Share Resource ↗</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==================== ADMIN OFFICIAL FILE UPLOAD MODAL ==================== -->
+<div class="modal-backdrop" id="adminFileUploadModal">
+  <div class="modal" style="max-width:540px;">
+    <button class="modal-close" id="closeAdminUploadModalBtn" type="button" aria-label="Close Modal">&times;</button>
+    <h3>📤 Upload PDF / Document <span class="role-badge admin" style="font-size:0.75rem;">Admin</span></h3>
+    <p style="font-size:0.85rem;color:var(--muted);margin-top:-6px;">
+      Upload official CBIC circulars, bare act PDFs, or study guides directly to the portal storage.
+    </p>
+
+    <form id="adminFileUploadForm" onsubmit="return false;">
+      <label for="adminUploadTitle">Document Title <span style="color:var(--bad);">*</span></label>
+      <input type="text" id="adminUploadTitle" placeholder="e.g. Notification No. 41/2018-Customs (N.T.) Bare Text" required>
+
+      <label for="adminUploadCategory">Category / Law Topic <span style="color:var(--bad);">*</span></label>
+      <select id="adminUploadCategory" required>
+        <option value="Customs Act 1962">Customs Act 1962</option>
+        <option value="CBLR 2018" selected>CBLR 2018</option>
+        <option value="Valuation Rules">Valuation Rules</option>
+        <option value="Foreign Trade Policy">Foreign Trade Policy</option>
+        <option value="Allied Acts">Allied Acts</option>
+        <option value="Question Bank Solutions">Question Bank Solutions</option>
+      </select>
+
+      <label for="adminUploadFileInput">Select File (.pdf, .docx, .xlsx, .doc) <span style="color:var(--bad);">*</span></label>
+      <input type="file" id="adminUploadFileInput" accept=".pdf,.docx,.xlsx,.doc" required>
+      <div id="adminFileMetaPreview" style="display:none;margin-top:6px;font-size:0.8rem;color:var(--navy);font-weight:600;"></div>
+
+      <label for="adminUploadDesc" style="margin-top:10px;">Short Preview / Conceptual Notes description</label>
+      <textarea id="adminUploadDesc" rows="3" placeholder="Key concepts, circular numbers, or statutory sections covered..."></textarea>
+
+      <div id="adminUploadFeedback" class="note" style="margin-top:10px;min-height:18px;"></div>
+
+      <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn outline" id="cancelAdminUploadBtn" type="button">Cancel</button>
+        <button class="btn accent" id="submitAdminUploadBtn" type="button">Upload &amp; Publish 📄</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -23186,7 +23560,10 @@
     bookmarks: new Set(),
     bankBookmarkOnly: false,
     fontSize: localStorage.getItem('cblr_font_size') || 'normal',
-    lastExamResults: null
+    lastExamResults: null,
+    materials: [],
+    materialFilter: 'all',
+    materialSearch: ''
   };
 
   const BOOKMARKS_STORAGE_KEY = 'cblr_portal_bookmarks_v1';
@@ -23261,6 +23638,82 @@
   const SUPABASE_CONFIG_KEY = 'cblr_supabase_config';
   const LOCAL_BANK_KEY = 'cblr_question_bank_local_v4';
   const LOCAL_HISTORY_KEY = 'cblr_history_local';
+  const MATERIALS_STORAGE_KEY = 'cblr_study_materials_v1';
+
+  const SEED_STUDY_MATERIALS = [
+    {
+      id: "mat-seed-001",
+      title: "CBIC Official Customs Brokers Licensing Regulations, 2018 (Notification No. 41/2018-Customs (N.T.))",
+      category: "CBLR 2018",
+      url: "https://www.cbic.gov.in/resources/htdocs-cbec/customs/cs-act/notifications/notfns-2018/cs-nt2018/csnt41-2018.pdf",
+      description: "Official statutory notification governing Customs Brokers licensing, eligibility, Rule 6 exam syllabus, Regulation 10 obligations, and disciplinary revocation.",
+      contributor: "CBIC Official",
+      type: "file",
+      file_format: "PDF",
+      file_size: "1.4 MB",
+      date: "2018-05-14"
+    },
+    {
+      id: "mat-seed-002",
+      title: "The Customs Act, 1962 - Complete Statutory Bare Act (CBIC Official Reference)",
+      category: "Customs Act 1962",
+      url: "https://www.cbic.gov.in/entities/customs-acts-1962",
+      description: "Complete statutory text of the Customs Act, 1962 with historical amendments. Covers assessment (§17), warehousing (§57-§73), search & seizure (§100-§110), confiscation & penalties.",
+      contributor: "CBIC Official",
+      type: "link",
+      file_format: "Bare Act",
+      file_size: "Statutory Web",
+      date: "1962-12-13"
+    },
+    {
+      id: "mat-seed-003",
+      title: "Customs Valuation (Determination of Value of Imported Goods) Rules, 2007",
+      category: "Valuation Rules",
+      url: "https://www.cbic.gov.in/resources/htdocs-cbec/customs/cs-act/formatted-htmls/cstms-valn-rules.htm",
+      description: "Comprehensive statutory valuation mechanism under Section 14: Transaction Value (Rule 3), Identical Goods (Rule 4), Similar Goods (Rule 5), Deductive (Rule 7), Computed (Rule 8), and Residual (Rule 9).",
+      contributor: "CBIC Official",
+      type: "link",
+      file_format: "Statutory Rules",
+      file_size: "Official HTML",
+      date: "2007-10-10"
+    },
+    {
+      id: "mat-seed-004",
+      title: "Baggage Rules, 2016 (Notification No. 30/2016-Customs (N.T.))",
+      category: "Allied Acts",
+      url: "https://www.cbic.gov.in/resources/htdocs-cbec/customs/cs-act/notifications/notfns-2016/cs-nt2016/csnt30-2016.pdf",
+      description: "Key statutory allowances for passenger clearances: General Free Allowance (GFA), Annexure I dutiable goods, jewellery allowance ceilings, and Transfer of Residence (TR) rules.",
+      contributor: "CBIC Official",
+      type: "file",
+      file_format: "PDF",
+      file_size: "520 KB",
+      date: "2016-03-01"
+    },
+    {
+      id: "mat-seed-005",
+      title: "Manufacture and Other Operations in Warehouse Regulations (MOOWR), 2019",
+      category: "Customs Act 1962",
+      url: "https://www.cbic.gov.in/resources/htdocs-cbec/customs/cs-act/notifications/notfns-2019/cs-nt2019/csnt69-2019.pdf",
+      description: "Section 65 bonded manufacturing framework: duty deferment on imported capital goods and raw materials, maintenance of digital registers, and clearances to DTA vs export.",
+      contributor: "CBIC Official",
+      type: "file",
+      file_format: "PDF",
+      file_size: "680 KB",
+      date: "2019-10-01"
+    },
+    {
+      id: "mat-seed-006",
+      title: "Foreign Trade Policy 2023 - Hand Book of Procedures (DGFT Official)",
+      category: "Foreign Trade Policy",
+      url: "https://www.dgft.gov.in/CP/?opt=ft-policy",
+      description: "Directorate General of Foreign Trade (DGFT) operative procedures for Advance Authorisation, EPCG Scheme, RoDTEP, Status Holders, Towns of Export Excellence, and SCOMET.",
+      contributor: "DGFT Official",
+      type: "link",
+      file_format: "Policy Portal",
+      file_size: "Official Portal",
+      date: "2023-04-01"
+    }
+  ];
 
   // OPTIONAL DEFAULT SUPABASE CREDENTIALS:
   // When hosting this file publicly, you can paste your Project URL and public anon key below
@@ -23436,10 +23889,11 @@
   // 4. Data Layer: Questions & Exam History
   // ==========================================================================
   async function loadData() {
-    await Promise.all([loadBank(), loadHistory()]);
+    await Promise.all([loadBank(), loadHistory(), loadMaterials()]);
     refreshHierarchyDropdowns();
     renderBankList();
     renderHistory();
+    renderMaterials();
     updateDashboard();
     if (isAdmin()) {
       renderAdminDashboard();
@@ -23690,7 +24144,19 @@
     document.getElementById('setupTab').style.display = currentTab === 'setup' ? 'block' : 'none';
     document.getElementById('bankTab').style.display = currentTab === 'bank' ? 'block' : 'none';
     document.getElementById('historyTab').style.display = currentTab === 'history' ? 'block' : 'none';
+    document.getElementById('materialsTab').style.display = currentTab === 'materials' ? 'block' : 'none';
     document.getElementById('adminTab').style.display = currentTab === 'admin' ? 'block' : 'none';
+
+    // Admin-only document upload button in study material library
+    const adminUploadDocBtn = document.getElementById('openAdminUploadDocBtn');
+    if (adminUploadDocBtn) {
+      adminUploadDocBtn.style.display = role === 'admin' ? 'inline-flex' : 'none';
+    }
+
+    // Refresh materials list to update admin-only delete buttons if view active
+    if (currentTab === 'materials') {
+      renderMaterials();
+    }
 
     // Admin Console visibility
     if (role === 'admin') {
@@ -23776,9 +24242,11 @@
       document.getElementById('setupTab').style.display = tab === 'setup' ? 'block' : 'none';
       document.getElementById('bankTab').style.display = tab === 'bank' ? 'block' : 'none';
       document.getElementById('historyTab').style.display = tab === 'history' ? 'block' : 'none';
+      document.getElementById('materialsTab').style.display = tab === 'materials' ? 'block' : 'none';
       document.getElementById('adminTab').style.display = tab === 'admin' ? 'block' : 'none';
 
       if (tab === 'history') renderHistory();
+      if (tab === 'materials') renderMaterials();
       if (tab === 'admin') renderAdminDashboard();
     });
   });
@@ -23989,6 +24457,7 @@
     document.getElementById('setupTab').style.display = 'none';
     document.getElementById('bankTab').style.display = 'none';
     document.getElementById('historyTab').style.display = 'none';
+    document.getElementById('materialsTab').style.display = 'none';
     document.getElementById('adminTab').style.display = 'none';
     document.querySelector('nav.tabs').style.display = 'none';
     document.getElementById('resultsScreen').style.display = 'none';
@@ -26417,10 +26886,25 @@ CREATE TABLE IF NOT EXISTS public.exam_attempts (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS public.study_materials (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    category TEXT NOT NULL,
+    url TEXT NOT NULL,
+    description TEXT,
+    contributor TEXT DEFAULT 'Contributor',
+    type TEXT DEFAULT 'link',
+    file_format TEXT,
+    file_size TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL
+);
+
 -- Row Level Security (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.exam_attempts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.study_materials ENABLE ROW LEVEL SECURITY;
 
 CREATE OR REPLACE FUNCTION public.is_admin() RETURNS BOOLEAN AS $$
 BEGIN
@@ -26442,6 +26926,12 @@ CREATE POLICY "Only admins delete questions" ON public.questions FOR DELETE USIN
 CREATE POLICY "Candidates view own attempts" ON public.exam_attempts FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Candidates insert own attempts" ON public.exam_attempts FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Admins view all attempts" ON public.exam_attempts FOR SELECT USING (public.is_admin());
+
+-- Study Materials Policies
+CREATE POLICY "Anyone can view study materials" ON public.study_materials FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can insert study materials" ON public.study_materials FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "Admins can update study materials" ON public.study_materials FOR UPDATE USING (public.is_admin());
+CREATE POLICY "Admins can delete study materials" ON public.study_materials FOR DELETE USING (public.is_admin());
 
 -- Auto-create profile trigger
 CREATE OR REPLACE FUNCTION public.handle_new_user() RETURNS TRIGGER AS $$
@@ -26472,7 +26962,469 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
   });
 
   // ==========================================================================
-  // 16. Modal Helpers & Keyboard Shortcuts
+  // 16. Study Material & Statutory Repository Controller
+  // ==========================================================================
+  function getDomainFromUrl(url) {
+    if (!url) return '';
+    if (url.startsWith('data:')) return 'Local Document';
+    try {
+      const parsed = new URL(url);
+      return parsed.hostname.replace(/^www\./, '');
+    } catch (e) {
+      return '';
+    }
+  }
+
+  async function loadMaterials() {
+    let loaded = [];
+    try {
+      const raw = localStorage.getItem(MATERIALS_STORAGE_KEY);
+      if (raw) {
+        loaded = JSON.parse(raw);
+      }
+    } catch (e) {
+      console.warn("Error parsing local materials:", e);
+    }
+
+    if (!Array.isArray(loaded) || loaded.length === 0) {
+      loaded = [...SEED_STUDY_MATERIALS];
+      saveMaterialsLocally(loaded);
+    } else {
+      // Ensure seed materials remain available unless removed
+      SEED_STUDY_MATERIALS.forEach(seed => {
+        if (!loaded.some(item => item.id === seed.id || (item.title === seed.title && item.url === seed.url))) {
+          loaded.push(seed);
+        }
+      });
+      saveMaterialsLocally(loaded);
+    }
+
+    state.materials = loaded;
+
+    // Supabase cloud sync if connected
+    if (state.isCloud && state.supabase) {
+      try {
+        const { data, error } = await state.supabase
+          .from('study_materials')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && Array.isArray(data) && data.length > 0) {
+          const map = new Map();
+          state.materials.forEach(m => map.set(m.id, m));
+          data.forEach(cloudItem => {
+            map.set(cloudItem.id, {
+              id: cloudItem.id,
+              title: cloudItem.title,
+              category: cloudItem.category,
+              url: cloudItem.url,
+              description: cloudItem.description,
+              contributor: cloudItem.contributor,
+              type: cloudItem.type || 'link',
+              file_format: cloudItem.file_format || 'Web Link',
+              file_size: cloudItem.file_size || 'Cloud Resource',
+              date: (cloudItem.created_at || '').split('T')[0] || new Date().toISOString().split('T')[0]
+            });
+          });
+          state.materials = Array.from(map.values());
+          saveMaterialsLocally(state.materials);
+        }
+      } catch (err) {
+        // Silently keep local materials if cloud table is not provisioned
+      }
+    }
+  }
+
+  function saveMaterialsLocally(materials) {
+    try {
+      localStorage.setItem(MATERIALS_STORAGE_KEY, JSON.stringify(materials || state.materials));
+    } catch (e) {
+      console.warn("Unable to save materials to localStorage:", e);
+    }
+  }
+
+  async function addMaterialItem(item) {
+    state.materials.unshift(item);
+    saveMaterialsLocally(state.materials);
+    renderMaterials();
+
+    if (state.isCloud && state.supabase) {
+      try {
+        const rowToInsert = {
+          id: item.id,
+          title: item.title,
+          category: item.category,
+          url: item.url.startsWith('data:') ? 'Local Stored Document: ' + (item.fileName || item.title) : item.url,
+          description: item.description,
+          contributor: item.contributor,
+          type: item.type,
+          file_format: item.file_format,
+          file_size: item.file_size,
+          created_by: state.user?.id || null
+        };
+        await state.supabase.from('study_materials').upsert([rowToInsert]);
+      } catch (err) {
+        console.warn("Supabase material upload error:", err);
+      }
+    }
+  }
+
+  async function deleteMaterialItem(id) {
+    if (!isAdmin()) {
+      showToast("Only administrators can remove study materials.");
+      return;
+    }
+    const idx = state.materials.findIndex(m => m.id === id);
+    if (idx === -1) return;
+
+    if (!confirm(`Delete study material "${state.materials[idx].title}"?`)) return;
+
+    state.materials.splice(idx, 1);
+    saveMaterialsLocally(state.materials);
+    renderMaterials();
+    showToast("Material removed from repository.");
+
+    if (state.isCloud && state.supabase) {
+      try {
+        await state.supabase.from('study_materials').delete().eq('id', id);
+      } catch (err) {
+        console.warn("Supabase material delete error:", err);
+      }
+    }
+  }
+
+  function renderMaterials() {
+    const listEl = document.getElementById('materialsList');
+    if (!listEl) return;
+
+    const query = (state.materialSearch || '').toLowerCase().trim();
+    const activeCat = state.materialFilter || 'all';
+
+    const filtered = state.materials.filter(item => {
+      // Category filter
+      if (activeCat !== 'all' && item.category !== activeCat) {
+        return false;
+      }
+      // Search query filter
+      if (query) {
+        const titleMatch = (item.title || '').toLowerCase().includes(query);
+        const descMatch = (item.description || '').toLowerCase().includes(query);
+        const catMatch = (item.category || '').toLowerCase().includes(query);
+        const contribMatch = (item.contributor || '').toLowerCase().includes(query);
+        const domainMatch = getDomainFromUrl(item.url).toLowerCase().includes(query);
+        if (!titleMatch && !descMatch && !catMatch && !contribMatch && !domainMatch) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    // Update KPI statistics
+    const totalCount = state.materials.length;
+    const officialCount = state.materials.filter(m =>
+      (m.contributor && (m.contributor.includes('CBIC') || m.contributor.includes('DGFT') || m.contributor.includes('Admin'))) ||
+      m.type === 'file'
+    ).length;
+    const communityCount = Math.max(0, totalCount - officialCount);
+
+    const statTotal = document.getElementById('matStatTotal');
+    const statOfficial = document.getElementById('matStatOfficial');
+    const statCommunity = document.getElementById('matStatCommunity');
+
+    if (statTotal) statTotal.textContent = totalCount;
+    if (statOfficial) statOfficial.textContent = officialCount;
+    if (statCommunity) statCommunity.textContent = communityCount;
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = `
+        <div class="mat-empty-state">
+          <div class="mat-empty-state-icon">🔍</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--navy-dark);margin-bottom:6px;">No study materials match your filter</div>
+          <p style="font-size:0.88rem;color:var(--muted);max-width:440px;margin:0 auto 16px;">
+            Try clearing your search query or selecting "All" to view available statutory references.
+          </p>
+          <button class="btn outline sm" id="matResetFilterBtn" type="button">Reset Filters &amp; Search</button>
+        </div>
+      `;
+      document.getElementById('matResetFilterBtn')?.addEventListener('click', () => {
+        state.materialFilter = 'all';
+        state.materialSearch = '';
+        const searchInput = document.getElementById('matSearchInput');
+        if (searchInput) searchInput.value = '';
+        document.querySelectorAll('.mat-filter-pill').forEach(p => {
+          p.classList.toggle('active', p.dataset.cat === 'all');
+        });
+        renderMaterials();
+      });
+      return;
+    }
+
+    const adminUser = isAdmin();
+
+    listEl.innerHTML = filtered.map(item => {
+      const isFile = item.type === 'file';
+      const typeBadge = isFile
+        ? `<span class="mat-badge-type file">📄 ${escapeHtml(item.file_format || 'Document')}</span>`
+        : `<span class="mat-badge-type link">🔗 Web Link</span>`;
+
+      const domain = getDomainFromUrl(item.url);
+      const domainBadge = domain ? `<span class="mat-badge-domain">${escapeHtml(domain)}</span>` : '';
+      const sizeBadge = item.file_size ? `<span class="mat-badge-domain">${escapeHtml(item.file_size)}</span>` : '';
+
+      const isDataUrl = item.url && item.url.startsWith('data:');
+      const openAction = isDataUrl
+        ? `<a href="${item.url}" download="${escapeHtml(item.fileName || item.title)}" class="btn sm outline">📥 Download File</a>`
+        : `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="btn sm outline">Open Resource ↗</a>`;
+
+      const deleteBtn = adminUser
+        ? `<button class="btn sm danger mat-delete-btn" data-id="${escapeHtml(item.id)}" type="button" title="Delete Material (Admin Only)">Delete 🗑️</button>`
+        : '';
+
+      return `
+        <div class="mat-item-card" data-id="${escapeHtml(item.id)}">
+          <div class="mat-item-top">
+            <div class="mat-item-title-group">
+              <div class="mat-item-badges">
+                <span class="mat-badge-cat">${escapeHtml(item.category)}</span>
+                ${typeBadge}
+                ${domainBadge}
+                ${sizeBadge}
+              </div>
+              <h3 class="mat-item-title">${escapeHtml(item.title)}</h3>
+            </div>
+          </div>
+          ${item.description ? `<p class="mat-item-desc">${escapeHtml(item.description)}</p>` : ''}
+          <div class="mat-item-bottom">
+            <div class="mat-item-meta">
+              <span>👤 <strong>${escapeHtml(item.contributor || 'Contributor')}</strong></span>
+              <span>📅 ${escapeHtml(item.date || 'Recent')}</span>
+            </div>
+            <div class="mat-item-actions">
+              ${openAction}
+              <button class="btn sm outline mat-copy-btn" data-url="${escapeHtml(item.url)}" type="button">Copy Link 📋</button>
+              ${deleteBtn}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Attach card event listeners
+    listEl.querySelectorAll('.mat-copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const url = btn.dataset.url;
+        if (!url) return;
+        if (url.startsWith('data:')) {
+          showToast("Local document data link (use Download File button)!");
+          return;
+        }
+        navigator.clipboard.writeText(url).then(() => {
+          const originalText = btn.textContent;
+          btn.textContent = '✓ Copied!';
+          setTimeout(() => { btn.textContent = originalText; }, 2000);
+          showToast("Resource URL copied to clipboard! 📋");
+        }).catch(() => {
+          showToast("Unable to copy to clipboard.");
+        });
+      });
+    });
+
+    if (adminUser) {
+      listEl.querySelectorAll('.mat-delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          deleteMaterialItem(btn.dataset.id);
+        });
+      });
+    }
+  }
+
+  // Live search input listener
+  const matSearchInput = document.getElementById('matSearchInput');
+  if (matSearchInput) {
+    matSearchInput.addEventListener('input', e => {
+      state.materialSearch = e.target.value;
+      renderMaterials();
+    });
+  }
+
+  // Category filter pills listener
+  document.querySelectorAll('.mat-filter-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.mat-filter-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      state.materialFilter = pill.dataset.cat || 'all';
+      renderMaterials();
+    });
+  });
+
+  // Regular user share link modal open/submit
+  document.getElementById('openShareLinkBtn')?.addEventListener('click', () => {
+    const titleIn = document.getElementById('shareLinkTitle');
+    const catIn = document.getElementById('shareLinkCategory');
+    const urlIn = document.getElementById('shareLinkUrl');
+    const descIn = document.getElementById('shareLinkDesc');
+    const contribIn = document.getElementById('shareLinkContributor');
+    const feedback = document.getElementById('shareLinkFeedback');
+
+    if (titleIn) titleIn.value = '';
+    if (catIn) catIn.value = 'CBLR 2018';
+    if (urlIn) urlIn.value = '';
+    if (descIn) descIn.value = '';
+    if (contribIn) contribIn.value = state.profile?.full_name || '';
+    if (feedback) feedback.textContent = '';
+    openModal('linkShareModal');
+  });
+
+  document.getElementById('submitLinkShareBtn')?.addEventListener('click', () => {
+    const title = (document.getElementById('shareLinkTitle')?.value || '').trim();
+    const category = document.getElementById('shareLinkCategory')?.value || 'CBLR 2018';
+    let url = (document.getElementById('shareLinkUrl')?.value || '').trim();
+    const desc = (document.getElementById('shareLinkDesc')?.value || '').trim();
+    const contrib = (document.getElementById('shareLinkContributor')?.value || '').trim() || (state.profile?.full_name || 'Examinee Contributor');
+    const feedback = document.getElementById('shareLinkFeedback');
+
+    if (!title) {
+      if (feedback) {
+        feedback.textContent = 'Please enter a title for the study resource.';
+        feedback.style.color = 'var(--bad)';
+      }
+      return;
+    }
+
+    if (!url) {
+      if (feedback) {
+        feedback.textContent = 'Please enter a valid resource URL link.';
+        feedback.style.color = 'var(--bad)';
+      }
+      return;
+    }
+
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
+
+    const newMaterial = {
+      id: 'mat-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6),
+      title: title,
+      category: category,
+      url: url,
+      description: desc,
+      contributor: contrib,
+      type: 'link',
+      file_format: 'Web Link',
+      file_size: 'External URL',
+      date: new Date().toISOString().split('T')[0]
+    };
+
+    addMaterialItem(newMaterial);
+    closeModal('linkShareModal');
+    showToast("Study material link added successfully! 📚");
+  });
+
+  // Admin upload document modal open/submit
+  document.getElementById('openAdminUploadDocBtn')?.addEventListener('click', () => {
+    if (!isAdmin()) {
+      showToast("Administrator privileges required for document upload.");
+      return;
+    }
+    const titleIn = document.getElementById('adminUploadTitle');
+    const catIn = document.getElementById('adminUploadCategory');
+    const fileIn = document.getElementById('adminUploadFileInput');
+    const descIn = document.getElementById('adminUploadDesc');
+    const preview = document.getElementById('adminFileMetaPreview');
+    const feedback = document.getElementById('adminUploadFeedback');
+
+    if (titleIn) titleIn.value = '';
+    if (catIn) catIn.value = 'CBLR 2018';
+    if (fileIn) fileIn.value = '';
+    if (descIn) descIn.value = '';
+    if (preview) { preview.style.display = 'none'; preview.textContent = ''; }
+    if (feedback) feedback.textContent = '';
+    openModal('adminFileUploadModal');
+  });
+
+  document.getElementById('adminUploadFileInput')?.addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    const preview = document.getElementById('adminFileMetaPreview');
+    const titleIn = document.getElementById('adminUploadTitle');
+    if (file && preview) {
+      const ext = file.name.split('.').pop().toUpperCase();
+      const sizeStr = file.size > 1048576
+        ? (file.size / (1024 * 1024)).toFixed(2) + ' MB'
+        : (file.size / 1024).toFixed(1) + ' KB';
+      preview.style.display = 'block';
+      preview.textContent = `📎 File Selected: ${file.name} (${ext} • ${sizeStr})`;
+      if (titleIn && !titleIn.value.trim()) {
+        titleIn.value = file.name.replace(/\.[^/.]+$/, "");
+      }
+    }
+  });
+
+  document.getElementById('submitAdminUploadBtn')?.addEventListener('click', () => {
+    if (!isAdmin()) {
+      showToast("Administrator privileges required.");
+      return;
+    }
+    const title = (document.getElementById('adminUploadTitle')?.value || '').trim();
+    const category = document.getElementById('adminUploadCategory')?.value || 'CBLR 2018';
+    const fileInput = document.getElementById('adminUploadFileInput');
+    const desc = (document.getElementById('adminUploadDesc')?.value || '').trim();
+    const feedback = document.getElementById('adminUploadFeedback');
+
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+      if (feedback) {
+        feedback.textContent = 'Please select a document file to upload.';
+        feedback.style.color = 'var(--bad)';
+      }
+      return;
+    }
+
+    const file = fileInput.files[0];
+    const finalTitle = title || file.name.replace(/\.[^/.]+$/, "");
+    const ext = file.name.split('.').pop().toUpperCase();
+    const sizeStr = file.size > 1048576
+      ? (file.size / (1024 * 1024)).toFixed(2) + ' MB'
+      : (file.size / 1024).toFixed(1) + ' KB';
+
+    if (feedback) {
+      feedback.textContent = 'Reading and processing file...';
+      feedback.style.color = 'var(--navy)';
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const dataUrl = evt.target.result;
+      const newDoc = {
+        id: 'mat-doc-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6),
+        title: finalTitle,
+        category: category,
+        url: dataUrl,
+        fileName: file.name,
+        description: desc || `Official statutory file: ${file.name}`,
+        contributor: 'Administrator (' + (state.profile?.full_name || 'Admin') + ')',
+        type: 'file',
+        file_format: ext,
+        file_size: sizeStr,
+        date: new Date().toISOString().split('T')[0]
+      };
+
+      addMaterialItem(newDoc);
+      closeModal('adminFileUploadModal');
+      showToast(`Document "${finalTitle}" uploaded successfully! 📄`);
+    };
+
+    reader.onerror = function() {
+      if (feedback) {
+        feedback.textContent = 'Failed to read file data. Please try again.';
+        feedback.style.color = 'var(--bad)';
+      }
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+  // ==========================================================================
+  // 17. Modal Helpers & Keyboard Shortcuts
   // ==========================================================================
   function openModal(id) {
     const el = document.getElementById(id);
@@ -26483,6 +27435,11 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
     const el = document.getElementById(id);
     if (el) el.classList.remove('open');
   }
+
+  document.getElementById('closeLinkShareModalBtn')?.addEventListener('click', () => closeModal('linkShareModal'));
+  document.getElementById('cancelLinkShareBtn')?.addEventListener('click', () => closeModal('linkShareModal'));
+  document.getElementById('closeAdminUploadModalBtn')?.addEventListener('click', () => closeModal('adminFileUploadModal'));
+  document.getElementById('cancelAdminUploadBtn')?.addEventListener('click', () => closeModal('adminFileUploadModal'));
 
   document.getElementById('closeAuthModalBtn')?.addEventListener('click', () => closeModal('authModal'));
   document.getElementById('closeCloudModalBtn')?.addEventListener('click', () => closeModal('cloudModal'));
@@ -26535,7 +27492,7 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
   }
 
   // ==========================================================================
-  // 17. Initialization
+  // 18. Initialization
   // ==========================================================================
   loadBookmarks();
   updateUserInterface();
