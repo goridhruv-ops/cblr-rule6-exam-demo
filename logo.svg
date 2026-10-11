@@ -1,0 +1,209 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Radial Gradient: Royal Navy to Midnight Blue -->
+    <radialGradient id="bgGradient" cx="50%" cy="42%" r="65%">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="36%" stop-color="#142555"/>
+      <stop offset="72%" stop-color="#0a1329"/>
+      <stop offset="100%" stop-color="#040711"/>
+    </radialGradient>
+
+    <!-- Center Medallion Field Subtle Radial Glow -->
+    <radialGradient id="innerField" cx="50%" cy="46%" r="56%">
+      <stop offset="0%" stop-color="#1d4ed8" stop-opacity="0.45"/>
+      <stop offset="60%" stop-color="#0e224e" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#071127" stop-opacity="0.98"/>
+    </radialGradient>
+
+    <!-- Regal Gold Gradients -->
+    <linearGradient id="goldPrimary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF9D8"/>
+      <stop offset="16%" stop-color="#FADB7F"/>
+      <stop offset="42%" stop-color="#D4AF37"/>
+      <stop offset="68%" stop-color="#9C6A15"/>
+      <stop offset="86%" stop-color="#E9C256"/>
+      <stop offset="100%" stop-color="#A67518"/>
+    </linearGradient>
+
+    <linearGradient id="goldBright" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#DDA323"/>
+      <stop offset="28%" stop-color="#FFFDE8"/>
+      <stop offset="60%" stop-color="#F5CF58"/>
+      <stop offset="100%" stop-color="#B5801C"/>
+    </linearGradient>
+
+    <linearGradient id="goldHorizontal" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#8B570D"/>
+      <stop offset="20%" stop-color="#FADB7F"/>
+      <stop offset="50%" stop-color="#FFFDF5"/>
+      <stop offset="80%" stop-color="#FADB7F"/>
+      <stop offset="100%" stop-color="#8B570D"/>
+    </linearGradient>
+
+    <linearGradient id="goldVertical" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#FFFDF0"/>
+      <stop offset="25%" stop-color="#F2C750"/>
+      <stop offset="65%" stop-color="#A87518"/>
+      <stop offset="100%" stop-color="#633D06"/>
+    </linearGradient>
+
+    <!-- Elevation Drop Shadow Filter -->
+    <filter id="dropShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3.5" flood-color="#000000" flood-opacity="0.75"/>
+    </filter>
+
+    <!-- Concentric Text Paths -->
+    <!-- Top Arc (radius 186): CBLR RULE 6 -->
+    <path id="topArc" d="M 70,256 A 186,186 0 0,1 442,256" fill="none"/>
+    <!-- Bottom Arc (radius 206): EXAM PREPARATION PORTAL -->
+    <path id="bottomArc" d="M 50,256 A 206,206 0 0,0 462,256" fill="none"/>
+  </defs>
+
+  <!-- Deep Midnight Navy Base Canvas -->
+  <rect width="512" height="512" fill="#070d1e"/>
+
+  <!-- Main Circular Medallion Disc -->
+  <circle cx="256" cy="256" r="250" fill="url(#bgGradient)"/>
+
+  <!-- Outer Concentric Golden Borders -->
+  <circle cx="256" cy="256" r="244" fill="none" stroke="url(#goldPrimary)" stroke-width="4.5"/>
+  <circle cx="256" cy="256" r="236" fill="none" stroke="url(#goldBright)" stroke-width="1.8" stroke-dasharray="3.5 5"/>
+  <circle cx="256" cy="256" r="228" fill="none" stroke="url(#goldPrimary)" stroke-width="2"/>
+
+  <!-- Inner Concentric Golden Border -->
+  <circle cx="256" cy="256" r="166" fill="none" stroke="url(#goldPrimary)" stroke-width="2.5"/>
+  <circle cx="256" cy="256" r="159" fill="none" stroke="url(#goldBright)" stroke-width="1.5" stroke-dasharray="2.5 4"/>
+
+  <!-- Central Field Medallion -->
+  <circle cx="256" cy="256" r="154" fill="url(#innerField)"/>
+
+  <!-- Circular Text Ring -->
+  <!-- Top Arc: CBLR RULE 6 -->
+  <text font-family="'Cinzel', 'Trajan Pro', 'Georgia', 'Times New Roman', -apple-system, serif" font-size="32" font-weight="800" fill="url(#goldBright)" letter-spacing="6" filter="url(#dropShadow)">
+    <textPath href="#topArc" startOffset="50%" text-anchor="middle">CBLR RULE 6</textPath>
+  </text>
+
+  <!-- Bottom Arc: EXAM PREPARATION PORTAL -->
+  <text font-family="'Cinzel', 'Trajan Pro', 'Georgia', 'Times New Roman', -apple-system, serif" font-size="18" font-weight="700" fill="url(#goldBright)" letter-spacing="4.5" filter="url(#dropShadow)">
+    <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">EXAM PREPARATION PORTAL</textPath>
+  </text>
+
+  <!-- Flanking 5-Point Stars -->
+  <g fill="url(#goldBright)" filter="url(#dropShadow)">
+    <!-- Left Star at (56, 256) -->
+    <polygon points="56,246 59,253 66,253 60,257 62,264 56,260 50,264 52,257 46,253 53,253"/>
+    <!-- Right Star at (456, 256) -->
+    <polygon points="456,246 459,253 466,253 460,257 462,264 456,260 450,264 452,257 446,253 453,253"/>
+  </g>
+
+  <!-- Laurel Wreath Embracing the Emblem -->
+  <g fill="url(#goldPrimary)" opacity="0.8" filter="url(#dropShadow)">
+    <!-- Left Branch Stem -->
+    <path d="M 166,350 C 138,305 136,238 160,192" fill="none" stroke="url(#goldBright)" stroke-width="2.2" stroke-linecap="round"/>
+    <!-- Left Leaves -->
+    <path d="M 156,338 C 148,332 142,324 145,316 C 151,321 156,328 156,338 Z"/>
+    <path d="M 146,320 C 138,312 133,304 138,295 C 143,301 147,309 146,320 Z"/>
+    <path d="M 139,298 C 131,289 127,279 134,271 C 138,278 141,287 139,298 Z"/>
+    <path d="M 136,273 C 129,263 128,252 136,245 C 139,253 140,263 136,273 Z"/>
+    <path d="M 138,247 C 133,237 134,226 143,220 C 144,229 143,238 138,247 Z"/>
+    <path d="M 145,223 C 141,213 145,203 154,198 C 153,207 150,216 145,223 Z"/>
+
+    <!-- Right Branch Stem -->
+    <path d="M 346,350 C 374,305 376,238 352,192" fill="none" stroke="url(#goldBright)" stroke-width="2.2" stroke-linecap="round"/>
+    <!-- Right Leaves -->
+    <path d="M 356,338 C 364,332 370,324 367,316 C 361,321 356,328 356,338 Z"/>
+    <path d="M 366,320 C 374,312 379,304 374,295 C 369,301 365,309 366,320 Z"/>
+    <path d="M 373,298 C 381,289 385,279 378,271 C 374,278 371,287 373,298 Z"/>
+    <path d="M 376,273 C 383,263 384,252 376,245 C 373,253 372,263 376,273 Z"/>
+    <path d="M 374,247 C 379,237 378,226 369,220 C 368,229 369,238 374,247 Z"/>
+    <path d="M 367,223 C 371,213 367,203 358,198 C 359,207 362,216 367,223 Z"/>
+  </g>
+
+  <!-- Central Authority Emblem: Customs Anchor + Scales of Justice -->
+  <g id="authorityEmblem" filter="url(#dropShadow)">
+
+    <!-- 1. MARITIME CUSTOMS ANCHOR -->
+    <!-- Anchor Shackle Ring at top -->
+    <circle cx="256" cy="138" r="18" fill="none" stroke="url(#goldVertical)" stroke-width="6"/>
+    <circle cx="256" cy="138" r="21" fill="none" stroke="url(#goldBright)" stroke-width="1.5" opacity="0.8"/>
+
+    <!-- Anchor Collar Bracket -->
+    <rect x="249" y="152" width="14" height="8" rx="2" fill="url(#goldPrimary)"/>
+
+    <!-- Anchor Stock (Horizontal Crossbar) -->
+    <path d="M 206,168 L 306,168 C 311,168 314,164 314,160.5 C 314,157 311,153 306,153 L 206,153 C 201,153 198,157 198,160.5 C 198,164 201,168 206,168 Z" fill="url(#goldHorizontal)"/>
+    <circle cx="199" cy="160.5" r="6.5" fill="url(#goldBright)"/>
+    <circle cx="313" cy="160.5" r="6.5" fill="url(#goldBright)"/>
+
+    <!-- Central Anchor Shank (Vertical Column) -->
+    <path d="M 250,168 L 249,348 C 249,352 252,355 256,355 C 260,355 263,352 263,348 L 262,168 Z" fill="url(#goldVertical)"/>
+    <line x1="256" y1="168" x2="256" y2="350" stroke="#FFFDF0" stroke-width="2" opacity="0.7"/>
+
+    <!-- Marine Rope / Cable Coiled on Shank -->
+    <path d="M 252,145 C 274,153 280,177 260,199 C 240,221 240,245 262,267 C 278,285 274,309 254,327 C 242,339 245,351 256,359" fill="none" stroke="url(#goldBright)" stroke-width="3" stroke-linecap="round" stroke-dasharray="6 2.5" opacity="0.55"/>
+
+    <!-- Anchor Arms (Seamless Crescent) -->
+    <path d="M 172,298 C 172,356 210,380 256,380 C 302,380 340,356 340,298 C 328,322 308,358 256,358 C 204,358 184,322 172,298 Z" fill="url(#goldVertical)"/>
+    <path d="M 172,298 C 184,322 204,358 256,358 C 308,358 328,322 340,298" fill="none" stroke="url(#goldBright)" stroke-width="2" opacity="0.7"/>
+
+    <!-- Left Fluke (Classic Sharp Triangular Palm) -->
+    <polygon points="172,298 152,278 186,286" fill="url(#goldBright)"/>
+    <polygon points="172,298 186,286 178,312" fill="url(#goldPrimary)"/>
+
+    <!-- Right Fluke (Classic Sharp Triangular Palm) -->
+    <polygon points="340,298 360,278 326,286" fill="url(#goldBright)"/>
+    <polygon points="340,298 326,286 334,312" fill="url(#goldPrimary)"/>
+
+    <!-- Anchor Crown Finial (Base point) -->
+    <polygon points="251,380 256,389 261,380" fill="url(#goldBright)"/>
+
+    <!-- 2. SCALES OF JUSTICE -->
+    <!-- Horizontal Balance Beam -->
+    <g id="balanceBeamGroup">
+      <!-- Main Tapered Beam -->
+      <path d="M 148,195 L 256,189 L 364,195 C 368,195 370,192 367,189 L 258,182 C 257,182 255,182 254,182 L 145,189 C 142,192 144,195 148,195 Z" fill="url(#goldHorizontal)"/>
+      
+      <!-- Central Rosette Fulcrum -->
+      <circle cx="256" cy="185" r="11" fill="url(#goldBright)"/>
+      <circle cx="256" cy="185" r="6" fill="#1e3a8a" stroke="url(#goldPrimary)" stroke-width="2"/>
+      <!-- Fulcrum Diamond Finial -->
+      <polygon points="256,166 259,174 256,178 253,174" fill="url(#goldBright)"/>
+
+      <!-- End Eyelets / Rings -->
+      <circle cx="147" cy="193" r="5" fill="none" stroke="url(#goldBright)" stroke-width="2.5"/>
+      <circle cx="365" cy="193" r="5" fill="none" stroke="url(#goldBright)" stroke-width="2.5"/>
+    </g>
+
+    <!-- Scale Cords / Triple Chains - Left -->
+    <g stroke="url(#goldBright)" stroke-width="1.4" opacity="0.85">
+      <line x1="147" y1="198" x2="123" y2="256"/>
+      <line x1="147" y1="198" x2="147" y2="256"/>
+      <line x1="147" y1="198" x2="171" y2="256"/>
+    </g>
+
+    <!-- Scale Cords / Triple Chains - Right -->
+    <g stroke="url(#goldBright)" stroke-width="1.4" opacity="0.85">
+      <line x1="365" y1="198" x2="341" y2="256"/>
+      <line x1="365" y1="198" x2="365" y2="256"/>
+      <line x1="365" y1="198" x2="389" y2="256"/>
+    </g>
+
+    <!-- Scale Pan - Left -->
+    <g id="leftPan">
+      <!-- Pan Bowl -->
+      <path d="M 118,256 C 122,272 172,272 176,256 Z" fill="url(#goldVertical)"/>
+      <!-- Pan Rim -->
+      <ellipse cx="147" cy="256" rx="29" ry="4" fill="url(#goldBright)"/>
+      <ellipse cx="147" cy="256" rx="26" ry="2.5" fill="#A87318" opacity="0.7"/>
+    </g>
+
+    <!-- Scale Pan - Right -->
+    <g id="rightPan">
+      <!-- Pan Bowl -->
+      <path d="M 336,256 C 340,272 390,272 394,256 Z" fill="url(#goldVertical)"/>
+      <!-- Pan Rim -->
+      <ellipse cx="365" cy="256" rx="29" ry="4" fill="url(#goldBright)"/>
+      <ellipse cx="365" cy="256" rx="26" ry="2.5" fill="#A87318" opacity="0.7"/>
+    </g>
+  </g>
+</svg>
