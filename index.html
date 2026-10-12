@@ -1872,38 +1872,43 @@
         <div class="auth-gate-icon">🔐</div>
         <div class="auth-gate-title">Examinee Authentication</div>
         <p class="auth-gate-subtitle">
-          Please sign in or create an account to access the syllabus drills, 1,200+ question bank, study materials, and your personal mock exam records.
+          Please sign in with your approved <strong>User ID</strong> or submit an access request to obtain examinee credentials.
         </p>
       </div>
 
       <div class="auth-gate-tabs">
-        <button id="gateTabSignIn" class="active" type="button">Sign In</button>
-        <button id="gateTabSignUp" type="button">Create Account</button>
+        <button id="gateTabSignIn" class="active" type="button">🔑 Login with User ID</button>
+        <button id="gateTabSignUp" type="button">📝 Request Access</button>
       </div>
 
-      <!-- Gate Sign In Form -->
+      <!-- Gate Sign In Form (User ID + Password) -->
       <div id="gateSignInForm">
-        <label>Email Address</label>
-        <input type="email" id="gateLoginEmail" placeholder="candidate@example.com" autocomplete="email">
+        <label>User ID</label>
+        <input type="text" id="gateLoginUserId" placeholder="e.g. rajesh_cblr or admin" autocomplete="username">
         <label>Password</label>
         <input type="password" id="gateLoginPass" placeholder="••••••••" autocomplete="current-password">
         <div id="gateAuthError" class="note" style="color:var(--bad);margin-top:10px;font-weight:600;min-height:18px;"></div>
         <div style="margin-top:18px;">
-          <button class="btn accent" id="gateSubmitSignInBtn" style="width:100%;padding:12px;font-size:0.95rem;">Sign In to Portal</button>
+          <button class="btn accent" id="gateSubmitSignInBtn" style="width:100%;padding:12px;font-size:0.95rem;">Sign In with User ID</button>
         </div>
       </div>
 
-      <!-- Gate Sign Up Form -->
+      <!-- Gate Access Request Form (Desired User ID, Password, Full Name, Phone) -->
       <div id="gateSignUpForm" style="display:none;">
+        <div class="alert-banner info" style="font-size:0.8rem;margin-bottom:14px;padding:8px 12px;">
+          ℹ️ Your access request will be reviewed by the administrator. Once approved, you can log in immediately.
+        </div>
+        <label>Desired User ID</label>
+        <input type="text" id="gateRegisterUserId" placeholder="e.g. adv_rajesh or candidate2026" autocomplete="username">
         <label>Full Name</label>
         <input type="text" id="gateRegisterName" placeholder="Adv. Rajesh Sharma">
-        <label>Email Address</label>
-        <input type="email" id="gateRegisterEmail" placeholder="candidate@example.com" autocomplete="email">
+        <label>Phone Number</label>
+        <input type="tel" id="gateRegisterPhone" placeholder="+91 98765 43210" autocomplete="tel">
         <label>Password (min 6 characters)</label>
         <input type="password" id="gateRegisterPass" placeholder="••••••••" autocomplete="new-password">
         <div id="gateRegisterError" class="note" style="color:var(--bad);margin-top:10px;font-weight:600;min-height:18px;"></div>
         <div style="margin-top:18px;">
-          <button class="btn brass" id="gateSubmitSignUpBtn" style="width:100%;padding:12px;font-size:0.95rem;">Create Examinee Account</button>
+          <button class="btn brass" id="gateSubmitSignUpBtn" style="width:100%;padding:12px;font-size:0.95rem;">Submit Access Request</button>
         </div>
       </div>
 
@@ -2366,6 +2371,36 @@
       </div>
     </div>
 
+    <!-- Access Requests & Approvals Panel -->
+    <div class="card" style="border-left: 4px solid var(--brass);">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+        <div>
+          <h2 style="margin:0;">👥 Access Requests &amp; User ID Approvals</h2>
+          <div style="font-size:0.85rem;color:var(--muted);margin-top:2px;">Review new candidate registrations requesting access to the portal.</div>
+        </div>
+        <span class="badge" id="pendingRequestsCountBadge" style="background:var(--brass);color:var(--navy-dark);font-weight:700;font-size:0.85rem;padding:4px 10px;border-radius:var(--radius-pill);">
+          0 Pending Requests
+        </span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table id="adminRequestsTable">
+          <thead>
+            <tr>
+              <th>Requested User ID</th>
+              <th>Full Name</th>
+              <th>Phone Number</th>
+              <th>Submitted Date</th>
+              <th>Status</th>
+              <th>Review Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:18px;">No pending access requests.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Registered Candidates Table -->
     <div class="card">
       <h2>Registered Examinees Roster</h2>
@@ -2373,15 +2408,18 @@
         <table id="adminUsersTable">
           <thead>
             <tr>
-              <th>Examinee Email</th>
+              <th>User ID</th>
+              <th>Full Name</th>
+              <th>Phone Number</th>
               <th>Role</th>
               <th>Joined Date</th>
               <th>Tests Taken</th>
               <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:18px;">Loading user registry...</td></tr>
+            <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:18px;">Loading user registry...</td></tr>
           </tbody>
         </table>
       </div>
@@ -23487,29 +23525,58 @@
   // ==========================================================================
   // 2. Application State Management & Session Persistence (Frictionless Access)
   // ==========================================================================
-  const PORTAL_SESSION_KEY = 'cblr_portal_user_session_v2';
-  const CANDIDATE_PROFILE_KEY = 'cblr_candidate_profile_v1';
+  const PORTAL_SESSION_KEY = 'cblr_portal_user_session_v3';
+  const USER_REGISTRY_KEY = 'cblr_user_registry_v1';
+  const ACCESS_REQUESTS_KEY = 'cblr_access_requests_v1';
 
-  function getCandidateProfile() {
+  // Seed default admin and sample approved examinee if empty
+  function getRegisteredUsers() {
     try {
-      const raw = localStorage.getItem(CANDIDATE_PROFILE_KEY);
-      if (raw) {
-        const p = JSON.parse(raw);
-        if (p && p.id) return p;
+      const raw = localStorage.getItem(USER_REGISTRY_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    const defaultRegistry = [
+      {
+        userId: 'admin',
+        password: 'admin123',
+        fullName: 'System Administrator (Dhruv Gori)',
+        phone: '+91 98765 00000',
+        role: 'admin',
+        status: 'approved',
+        createdAt: '2026-01-01T00:00:00.000Z'
+      },
+      {
+        userId: 'candidate_demo',
+        password: 'candidate123',
+        fullName: 'Adv. Suresh Rao',
+        phone: '+91 98111 22334',
+        role: 'user',
+        status: 'approved',
+        createdAt: '2026-01-02T00:00:00.000Z'
       }
-    } catch(e) {}
-    const num = Math.floor(1000 + Math.random() * 9000);
-    const newProf = {
-      id: 'cand-' + num,
-      name: 'Adv. Examinee #' + num,
-      email: 'candidate-' + num + '@cblr.local',
-      role: 'user',
-      createdAt: new Date().toISOString()
-    };
+    ];
+    saveRegisteredUsers(defaultRegistry);
+    return defaultRegistry;
+  }
+
+  function saveRegisteredUsers(users) {
     try {
-      localStorage.setItem(CANDIDATE_PROFILE_KEY, JSON.stringify(newProf));
-    } catch(e) {}
-    return newProf;
+      localStorage.setItem(USER_REGISTRY_KEY, JSON.stringify(users));
+    } catch (e) {}
+  }
+
+  function getAccessRequests() {
+    try {
+      const raw = localStorage.getItem(ACCESS_REQUESTS_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return [];
+  }
+
+  function saveAccessRequests(reqs) {
+    try {
+      localStorage.setItem(ACCESS_REQUESTS_KEY, JSON.stringify(reqs));
+    } catch (e) {}
   }
 
   function getPortalSession() {
@@ -23534,7 +23601,6 @@
     }
   }
 
-  const candProfile = getCandidateProfile();
   const initialStoredSession = getPortalSession();
 
   const state = {
@@ -23542,10 +23608,12 @@
     supabase: null,
     user: null,         // Supabase User object or null
     profile: (initialStoredSession && initialStoredSession.loggedIn) ? {
-      id: initialStoredSession.userId || candProfile.id,
-      email: initialStoredSession.email || candProfile.email,
-      role: initialStoredSession.role || candProfile.role,
-      full_name: initialStoredSession.fullName || candProfile.name
+      id: initialStoredSession.userId || 'user',
+      userId: initialStoredSession.userId || 'user',
+      email: initialStoredSession.email || (initialStoredSession.userId + '@cblr.portal'),
+      phone: initialStoredSession.phone || '',
+      role: initialStoredSession.role || 'user',
+      full_name: initialStoredSession.fullName || initialStoredSession.userId
     } : null,
     demoRole: (initialStoredSession && initialStoredSession.role) ? initialStoredSession.role : 'user',
     demoLoggedIn: Boolean(initialStoredSession && initialStoredSession.loggedIn),
@@ -24203,20 +24271,26 @@
       demoRoleBar.style.display = 'none';
     }
 
-    // Header Account Area: Displays active examinee badge and Logout button
+    // Header Account Area: Displays active examinee badge, User ID, and Logout button
     const isCloudUser = Boolean(state.isCloud && state.user);
-    const email = isCloudUser ? state.user.email : (state.profile?.full_name || state.profile?.email || 'Candidate');
+    const displayName = state.profile?.full_name || state.profile?.userId || 'Candidate';
+    const displayUserId = state.profile?.userId || (isCloudUser ? state.user.email : 'examinee');
     const isAdminUser = role === 'admin';
 
     userStateArea.innerHTML = `
       <div style="display:flex;align-items:center;gap:8px;">
         <span class="role-badge ${isAdminUser ? 'admin' : 'user'}">
-          ${isAdminUser ? '👑 Admin' : (isCloudUser ? '☁️ Cloud' : '👤 Candidate')}
+          ${isAdminUser ? '👑 Admin' : '👤 Examinee'}
         </span>
-        <span style="font-size:0.82rem;font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(email)}">
-          ${escapeHtml(email)}
-        </span>
-        <button class="btn sm outline" id="signOutBtn" title="Logout / Sign Out" style="border-color:#fca5a5;color:#b91c1c;background:#fff5f5;">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.2;">
+          <span style="font-size:0.82rem;font-weight:700;color:var(--navy-dark);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(displayName)}">
+            ${escapeHtml(displayName)}
+          </span>
+          <span style="font-size:0.72rem;color:var(--muted);font-family:var(--mono);">
+            ID: ${escapeHtml(displayUserId)}
+          </span>
+        </div>
+        <button class="btn sm outline" id="signOutBtn" title="Logout / Sign Out" style="border-color:#fca5a5;color:#b91c1c;background:#fff5f5;margin-left:4px;">
           🚪 Logout
         </button>
       </div>
@@ -26103,15 +26177,39 @@
   }
 
   document.getElementById('clearHistoryBtn').addEventListener('click', async () => {
-    if (confirm("Permanently erase all your examination attempts? This cannot be undone.")) {
-      if (state.isCloud && state.supabase && state.user) {
-        await state.supabase.from('exam_attempts').delete().eq('user_id', state.user.id);
+    if (confirm("Permanently erase all your examination attempts from both this device and the central database? This cannot be undone.")) {
+      const clearBtn = document.getElementById('clearHistoryBtn');
+      if (clearBtn) clearBtn.disabled = true;
+
+      try {
+        if (state.isCloud && state.supabase && state.user) {
+          const { error } = await state.supabase
+            .from('exam_attempts')
+            .delete()
+            .eq('user_id', state.user.id);
+
+          if (error) {
+            console.error("Central exam history deletion error:", error);
+            showToast("Warning: Local attempts cleared, but central database error: " + error.message);
+          } else {
+            showToast("Attempt history completely erased from both local storage and the central database!");
+          }
+        } else {
+          showToast("Local attempt history cleared.");
+        }
+      } catch (err) {
+        console.error("Failed to delete central exam history:", err);
+      } finally {
+        if (clearBtn) clearBtn.disabled = false;
       }
+
       state.history = [];
       localStorage.removeItem(LOCAL_HISTORY_KEY);
+      if (state.profile && state.profile.id) {
+        localStorage.removeItem('cblr_history_' + state.profile.id);
+      }
       renderHistory();
       updateDashboard();
-      showToast("Attempt history cleared.");
     }
   });
 
@@ -26324,71 +26422,170 @@
 
     document.getElementById('adminQuestionsCount').textContent = state.bank.length;
 
-    if (state.isCloud && state.supabase) {
-      // 1. Fetch Registered Users Profiles
-      const { data: profiles, error: pErr } = await state.supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+    // 1. Fetch & Render Access Requests
+    const requests = getAccessRequests();
+    const pendingReqs = requests.filter(r => r.status === 'pending');
+    const pendingBadge = document.getElementById('pendingRequestsCountBadge');
+    if (pendingBadge) {
+      pendingBadge.textContent = `${pendingReqs.length} Pending Request${pendingReqs.length === 1 ? '' : 's'}`;
+      pendingBadge.style.background = pendingReqs.length > 0 ? '#f59e0b' : 'var(--navy)';
+      pendingBadge.style.color = pendingReqs.length > 0 ? '#fff' : '#e2e8f0';
+    }
 
-      // 2. Fetch All Attempts (Admin policy allows this)
-      const { data: attempts, error: aErr } = await state.supabase
-        .from('exam_attempts')
-        .select('*');
-
-      const userCount = profiles ? profiles.length : 0;
-      const attemptCount = attempts ? attempts.length : 0;
-      document.getElementById('adminUsersCount').textContent = userCount;
-      document.getElementById('adminAttemptsCount').textContent = attemptCount;
-
-      if (attemptCount > 0) {
-        const passedCount = attempts.filter(a => a.passed).length;
-        document.getElementById('adminPassRate').textContent = Math.round((passedCount / attemptCount) * 100) + '%';
+    const reqTbody = document.querySelector('#adminRequestsTable tbody');
+    if (reqTbody) {
+      if (requests.length === 0) {
+        reqTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:18px;">No access requests found.</td></tr>';
       } else {
-        document.getElementById('adminPassRate').textContent = '0%';
-      }
-
-      // Render Users Table
-      const tbody = document.querySelector('#adminUsersTable tbody');
-      if (profiles && profiles.length > 0) {
-        tbody.innerHTML = '';
-        profiles.forEach(p => {
-          const userAttempts = (attempts || []).filter(a => a.user_id === p.id);
-          const dt = new Date(p.created_at || Date.now());
+        reqTbody.innerHTML = '';
+        requests.forEach(req => {
           const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><strong>${escapeHtml(p.email)}</strong></td>
-            <td><span class="role-badge ${p.role === 'admin' ? 'admin' : 'user'}">${p.role === 'admin' ? '👑 Admin' : '👤 Candidate'}</span></td>
-            <td>${dt.toLocaleDateString()}</td>
-            <td>${userAttempts.length} mock(s)</td>
-            <td><span style="color:var(--good);font-weight:600;">Active</span></td>
+          const isPending = req.status === 'pending';
+          const isApproved = req.status === 'approved';
+          const isRejected = req.status === 'rejected';
+
+          const statusBadge = isPending
+            ? `<span class="badge" style="background:#fef3c7;color:#92400e;padding:3px 8px;border-radius:12px;font-weight:700;font-size:0.75rem;">⏳ Pending Review</span>`
+            : isApproved
+            ? `<span class="badge" style="background:#dcfce7;color:#166534;padding:3px 8px;border-radius:12px;font-weight:700;font-size:0.75rem;">✓ Approved</span>`
+            : `<span class="badge" style="background:#fee2e2;color:#991b1b;padding:3px 8px;border-radius:12px;font-weight:700;font-size:0.75rem;">✕ Rejected</span>`;
+
+          const actions = isPending ? `
+            <div style="display:flex;gap:6px;">
+              <button class="btn sm" data-action="approve" data-id="${escapeHtml(req.userId)}" style="background:#16a34a;color:#fff;padding:4px 10px;font-size:0.75rem;">
+                ✓ Approve
+              </button>
+              <button class="btn sm outline" data-action="reject" data-id="${escapeHtml(req.userId)}" style="border-color:#f87171;color:#dc2626;padding:4px 10px;font-size:0.75rem;">
+                ✕ Reject
+              </button>
+            </div>
+          ` : `
+            <span style="font-size:0.8rem;color:var(--muted);">${isApproved ? 'Active Account' : 'Request Closed'}</span>
           `;
-          tbody.appendChild(tr);
+
+          const dt = req.submittedAt ? new Date(req.submittedAt).toLocaleDateString() : '—';
+          tr.innerHTML = `
+            <td><strong><code>${escapeHtml(req.userId)}</code></strong></td>
+            <td><strong>${escapeHtml(req.fullName || '—')}</strong></td>
+            <td>${escapeHtml(req.phone || '—')}</td>
+            <td>${dt}</td>
+            <td>${statusBadge}</td>
+            <td>${actions}</td>
+          `;
+          reqTbody.appendChild(tr);
         });
-      } else {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:18px;">No registered profiles found in cloud database.</td></tr>';
+
+        // Attach action handlers for approve / reject
+        reqTbody.querySelectorAll('button[data-action="approve"]').forEach(btn => {
+          btn.addEventListener('click', () => handleApproveRequest(btn.dataset.id));
+        });
+        reqTbody.querySelectorAll('button[data-action="reject"]').forEach(btn => {
+          btn.addEventListener('click', () => handleRejectRequest(btn.dataset.id));
+        });
       }
+    }
+
+    // 2. Fetch & Render Registered Examinees Roster
+    const users = getRegisteredUsers();
+    document.getElementById('adminUsersCount').textContent = users.length;
+    document.getElementById('adminAttemptsCount').textContent = state.history.length;
+
+    if (state.history.length > 0) {
+      const passedCount = state.history.filter(a => a.passed).length;
+      document.getElementById('adminPassRate').textContent = Math.round((passedCount / state.history.length) * 100) + '%';
     } else {
-      // Local demo mode stats
-      document.getElementById('adminUsersCount').textContent = "1 (Demo)";
-      document.getElementById('adminAttemptsCount').textContent = state.history.length;
-      if (state.history.length > 0) {
-        const passedCount = state.history.filter(a => a.passed).length;
-        document.getElementById('adminPassRate').textContent = Math.round((passedCount / state.history.length) * 100) + '%';
-      } else {
-        document.getElementById('adminPassRate').textContent = "—";
+      document.getElementById('adminPassRate').textContent = '—';
+    }
+
+    const usersTbody = document.querySelector('#adminUsersTable tbody');
+    if (usersTbody) {
+      usersTbody.innerHTML = '';
+      users.forEach(u => {
+        const tr = document.createElement('tr');
+        const dt = u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—';
+        const isAdminUser = u.role === 'admin';
+        tr.innerHTML = `
+          <td><strong><code>${escapeHtml(u.userId)}</code></strong></td>
+          <td><strong>${escapeHtml(u.fullName || u.userId)}</strong></td>
+          <td>${escapeHtml(u.phone || '—')}</td>
+          <td><span class="role-badge ${isAdminUser ? 'admin' : 'user'}">${isAdminUser ? '👑 Admin' : '👤 Examinee'}</span></td>
+          <td>${dt}</td>
+          <td>${u.userId === state.profile?.userId ? state.history.length : 0} mock(s)</td>
+          <td><span style="color:var(--good);font-weight:600;">Active</span></td>
+          <td>
+            ${u.userId !== 'admin' ? `
+              <button class="btn sm outline" data-action="delete-user" data-id="${escapeHtml(u.userId)}" style="border-color:#fca5a5;color:#b91c1c;padding:3px 8px;font-size:0.75rem;">
+                Revoke Access
+              </button>
+            ` : '<span style="font-size:0.75rem;color:var(--muted);">Root Administrator</span>'}
+          </td>
+        `;
+        usersTbody.appendChild(tr);
+      });
+
+      usersTbody.querySelectorAll('button[data-action="delete-user"]').forEach(btn => {
+        btn.addEventListener('click', () => handleRevokeUser(btn.dataset.id));
+      });
+    }
+  }
+
+  // Admin Approval Action Handler
+  function handleApproveRequest(reqUserId) {
+    const requests = getAccessRequests();
+    const req = requests.find(r => r.userId.toLowerCase() === reqUserId.toLowerCase());
+    if (!req) return;
+
+    if (confirm(`Approve User ID "${req.userId}" for examinee ${req.fullName}?`)) {
+      req.status = 'approved';
+      req.reviewedAt = new Date().toISOString();
+      saveAccessRequests(requests);
+
+      // Add to registered users
+      const users = getRegisteredUsers();
+      if (!users.some(u => u.userId.toLowerCase() === req.userId.toLowerCase())) {
+        users.push({
+          userId: req.userId,
+          password: req.password,
+          fullName: req.fullName,
+          phone: req.phone,
+          role: req.role || 'user',
+          status: 'approved',
+          createdAt: new Date().toISOString()
+        });
+        saveRegisteredUsers(users);
       }
 
-      const tbody = document.querySelector('#adminUsersTable tbody');
-      tbody.innerHTML = `
-        <tr>
-          <td><strong>demo-examinee@local</strong></td>
-          <td><span class="role-badge admin">👑 Admin Preview</span></td>
-          <td>${new Date().toLocaleDateString()}</td>
-          <td>${state.history.length} mock(s)</td>
-          <td><span style="color:var(--brass-dark);font-weight:600;">Local Sandbox</span></td>
-        </tr>
-      `;
+      showToast(`User ID "${req.userId}" approved! Examinee can now sign in.`);
+      renderAdminDashboard();
+    }
+  }
+
+  // Admin Rejection Action Handler
+  function handleRejectRequest(reqUserId) {
+    const requests = getAccessRequests();
+    const req = requests.find(r => r.userId.toLowerCase() === reqUserId.toLowerCase());
+    if (!req) return;
+
+    if (confirm(`Decline access request for User ID "${req.userId}" (${req.fullName})?`)) {
+      req.status = 'rejected';
+      req.reviewedAt = new Date().toISOString();
+      saveAccessRequests(requests);
+      showToast(`Access request for "${req.userId}" declined.`);
+      renderAdminDashboard();
+    }
+  }
+
+  // Revoke User Access Handler
+  function handleRevokeUser(userId) {
+    if (userId === 'admin') {
+      alert("The root administrator account cannot be deleted.");
+      return;
+    }
+    if (confirm(`Revoke portal access for examinee User ID "${userId}"?`)) {
+      const users = getRegisteredUsers().filter(u => u.userId.toLowerCase() !== userId.toLowerCase());
+      saveRegisteredUsers(users);
+      showToast(`Access for User ID "${userId}" revoked.`);
+      renderAdminDashboard();
     }
   }
 
@@ -26651,142 +26848,195 @@
   });
 
   document.getElementById('gateSubmitSignInBtn')?.addEventListener('click', async () => {
-    const email = document.getElementById('gateLoginEmail').value.trim();
-    const pass = document.getElementById('gateLoginPass').value;
+    const rawUserId = document.getElementById('gateLoginUserId')?.value.trim();
+    const pass = document.getElementById('gateLoginPass')?.value;
     const errEl = document.getElementById('gateAuthError');
     errEl.textContent = '';
 
-    if (!email || !pass) {
-      errEl.textContent = 'Please enter both email and password.';
+    if (!rawUserId || !pass) {
+      errEl.textContent = 'Please enter both your User ID and password.';
       return;
     }
 
-    if (!state.isCloud || !state.supabase) {
-      state.demoLoggedIn = true;
-      state.demoRole = email.toLowerCase().includes('admin') ? 'admin' : 'user';
-      state.profile = {
-        id: 'local-user-' + Date.now(),
-        email: email,
-        role: state.demoRole,
-        full_name: email.split('@')[0]
-      };
-      savePortalSession({
-        loggedIn: true,
-        mode: 'local',
-        email: email,
-        role: state.demoRole,
-        fullName: email.split('@')[0]
-      });
-      closeAuthModal();
-      updateUserInterface();
-      await loadData();
-      showToast(`Signed in as ${state.demoRole === 'admin' ? 'Admin' : 'Candidate'}.`);
-      return;
-    }
-
+    const userId = rawUserId.toLowerCase();
     const btn = document.getElementById('gateSubmitSignInBtn');
     btn.disabled = true;
-    btn.textContent = 'Signing in...';
+    btn.textContent = 'Verifying credentials...';
 
-    const { data, error } = await state.supabase.auth.signInWithPassword({ email, password: pass });
-    btn.disabled = false;
-    btn.textContent = 'Sign In to Portal';
+    try {
+      // 1. Check if User ID is in Pending Access Requests
+      const requests = getAccessRequests();
+      const existingReq = requests.find(r => r.userId.toLowerCase() === userId);
+      if (existingReq) {
+        if (existingReq.status === 'pending') {
+          errEl.textContent = `⏳ Access Request Pending: User ID "${rawUserId}" is awaiting review and approval by the administrator.`;
+          btn.disabled = false;
+          btn.textContent = 'Sign In with User ID';
+          return;
+        } else if (existingReq.status === 'rejected') {
+          errEl.textContent = `❌ Access Request Declined: User ID "${rawUserId}" was not approved by the administrator. You may submit a new request.`;
+          btn.disabled = false;
+          btn.textContent = 'Sign In with User ID';
+          return;
+        }
+      }
 
-    if (error) {
-      errEl.textContent = error.message;
-    } else {
-      state.user = data.user;
-      await fetchUserProfile(data.user);
+      // 2. Check User Registry
+      const users = getRegisteredUsers();
+      const user = users.find(u => u.userId.toLowerCase() === userId);
+
+      if (!user) {
+        errEl.textContent = `User ID "${rawUserId}" not found. Please click "Request Access" to apply for an account.`;
+        btn.disabled = false;
+        btn.textContent = 'Sign In with User ID';
+        return;
+      }
+
+      if (user.password !== pass) {
+        errEl.textContent = 'Incorrect password. Please try again.';
+        btn.disabled = false;
+        btn.textContent = 'Sign In with User ID';
+        return;
+      }
+
+      // 3. User authenticated successfully
+      state.demoLoggedIn = true;
+      state.demoRole = user.role || 'user';
+      state.profile = {
+        id: user.userId,
+        userId: user.userId,
+        email: user.userId + '@cblr.portal',
+        phone: user.phone || '',
+        role: user.role,
+        full_name: user.fullName || user.userId
+      };
+
       savePortalSession({
         loggedIn: true,
-        mode: 'cloud',
-        userId: data.user.id,
-        email: data.user.email,
-        role: state.profile?.role || 'user',
-        fullName: state.profile?.full_name || data.user.email
+        mode: 'userid',
+        userId: user.userId,
+        email: user.userId + '@cblr.portal',
+        phone: user.phone || '',
+        role: user.role,
+        fullName: user.fullName || user.userId
       });
+
       closeAuthModal();
       updateUserInterface();
       await loadData();
-      await syncLocalHistoryToCloud();
-      showToast(`Welcome, ${data.user.email}! (Cloud Synced ☁️)`);
+      showToast(`Welcome back, ${user.fullName}! Logged in as ${user.role === 'admin' ? '👑 Admin' : '👤 Examinee'}.`);
+
+    } catch (e) {
+      console.error(e);
+      errEl.textContent = "Sign in error: " + e.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Sign In with User ID';
     }
   });
 
   document.getElementById('gateSubmitSignUpBtn')?.addEventListener('click', async () => {
-    const name = document.getElementById('gateRegisterName').value.trim();
-    const email = document.getElementById('gateRegisterEmail').value.trim();
-    const pass = document.getElementById('gateRegisterPass').value;
+    const rawUserId = document.getElementById('gateRegisterUserId')?.value.trim();
+    const name = document.getElementById('gateRegisterName')?.value.trim();
+    const phone = document.getElementById('gateRegisterPhone')?.value.trim();
+    const pass = document.getElementById('gateRegisterPass')?.value;
     const errEl = document.getElementById('gateRegisterError');
     errEl.textContent = '';
 
-    if (!email || !pass) {
-      errEl.textContent = 'Email and password are required.';
+    if (!rawUserId) {
+      errEl.textContent = 'Desired User ID is required.';
       return;
     }
-    if (pass.length < 6) {
+    if (rawUserId.length < 3) {
+      errEl.textContent = 'User ID must be at least 3 characters.';
+      return;
+    }
+    if (!/^[a-zA-Z0-9_.-]+$/.test(rawUserId)) {
+      errEl.textContent = 'User ID can only contain letters, numbers, hyphens, and underscores.';
+      return;
+    }
+    if (!name) {
+      errEl.textContent = 'Full name is required.';
+      return;
+    }
+    if (!phone) {
+      errEl.textContent = 'Phone number is required.';
+      return;
+    }
+    if (!pass || pass.length < 6) {
       errEl.textContent = 'Password must be at least 6 characters.';
       return;
     }
 
-    if (!state.isCloud || !state.supabase) {
-      state.demoLoggedIn = true;
-      state.demoRole = 'user';
-      state.profile = {
-        id: 'local-user-' + Date.now(),
-        email: email,
-        role: 'user',
-        full_name: name || email.split('@')[0]
-      };
-      savePortalSession({
-        loggedIn: true,
-        mode: 'local',
-        email: email,
-        role: 'user',
-        fullName: name || email.split('@')[0]
-      });
-      closeAuthModal();
-      updateUserInterface();
-      await loadData();
-      showToast("Account created and signed in successfully.");
+    const userId = rawUserId.toLowerCase();
+    const users = getRegisteredUsers();
+    if (users.some(u => u.userId.toLowerCase() === userId)) {
+      errEl.textContent = `User ID "${rawUserId}" is already in use by an approved account. Please choose a different User ID.`;
+      return;
+    }
+
+    const requests = getAccessRequests();
+    const pendingIdx = requests.findIndex(r => r.userId.toLowerCase() === userId && r.status === 'pending');
+    if (pendingIdx !== -1) {
+      errEl.textContent = `An access request for User ID "${rawUserId}" is already pending administrator approval.`;
       return;
     }
 
     const btn = document.getElementById('gateSubmitSignUpBtn');
     btn.disabled = true;
-    btn.textContent = 'Creating account...';
+    btn.textContent = 'Submitting request...';
 
-    const { data, error } = await state.supabase.auth.signUp({
-      email,
+    const newRequest = {
+      id: 'req-' + Date.now(),
+      userId: rawUserId,
       password: pass,
-      options: {
-        data: { full_name: name || email.split('@')[0] }
-      }
-    });
-    btn.disabled = false;
-    btn.textContent = 'Create Examinee Account';
+      fullName: name,
+      phone: phone,
+      role: 'user',
+      status: 'pending',
+      submittedAt: new Date().toISOString()
+    };
 
-    if (error) {
-      errEl.textContent = error.message;
-    } else {
-      if (data.session && data.user) {
-        state.user = data.user;
-        await fetchUserProfile(data.user);
-        savePortalSession({
-          loggedIn: true,
-          mode: 'cloud',
-          userId: data.user.id,
-          email: data.user.email,
-          role: state.profile?.role || 'user',
-          fullName: state.profile?.full_name || data.user.email
-        });
+    // Save locally
+    requests.unshift(newRequest);
+    saveAccessRequests(requests);
+
+    // Sync to Supabase access_requests table if connected
+    if (state.isCloud && state.supabase) {
+      try {
+        await state.supabase.from('access_requests').insert([{
+          user_id_alias: rawUserId,
+          full_name: name,
+          phone: phone,
+          password_hash: pass,
+          status: 'pending',
+          role: 'user'
+        }]);
+      } catch (err) {
+        console.warn("Could not push access request to Supabase:", err);
       }
-      closeAuthModal();
-      updateUserInterface();
-      await loadData();
-      await syncLocalHistoryToCloud();
-      showToast("Account created successfully! (Cloud Synced ☁️)");
     }
+
+    btn.disabled = false;
+    btn.textContent = 'Submit Access Request';
+
+    // Clear inputs
+    document.getElementById('gateRegisterUserId').value = '';
+    document.getElementById('gateRegisterName').value = '';
+    document.getElementById('gateRegisterPhone').value = '';
+    document.getElementById('gateRegisterPass').value = '';
+
+    // Switch to sign-in tab with informative notice
+    gateTabSignIn?.click();
+    if (document.getElementById('gateLoginUserId')) {
+      document.getElementById('gateLoginUserId').value = rawUserId;
+    }
+    const authErr = document.getElementById('gateAuthError');
+    if (authErr) {
+      authErr.style.color = 'var(--good)';
+      authErr.textContent = `✅ Access request for "${rawUserId}" submitted! Awaiting administrator approval.`;
+    }
+    showToast(`Access request for "${rawUserId}" submitted successfully!`);
   });
 
   // ==========================================================================
@@ -26934,13 +27184,33 @@ CREATE POLICY "Only admins delete questions" ON public.questions FOR DELETE USIN
 -- Exam Attempts Policies
 CREATE POLICY "Candidates view own attempts" ON public.exam_attempts FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Candidates insert own attempts" ON public.exam_attempts FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Candidates delete own attempts" ON public.exam_attempts FOR DELETE USING (auth.uid() = user_id);
 CREATE POLICY "Admins view all attempts" ON public.exam_attempts FOR SELECT USING (public.is_admin());
+CREATE POLICY "Admins delete all attempts" ON public.exam_attempts FOR DELETE USING (public.is_admin());
 
 -- Study Materials Policies
 CREATE POLICY "Anyone can view study materials" ON public.study_materials FOR SELECT USING (true);
 CREATE POLICY "Authenticated users can insert study materials" ON public.study_materials FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 CREATE POLICY "Admins can update study materials" ON public.study_materials FOR UPDATE USING (public.is_admin());
 CREATE POLICY "Admins can delete study materials" ON public.study_materials FOR DELETE USING (public.is_admin());
+
+-- Access Requests Table & Policies
+CREATE TABLE IF NOT EXISTS public.access_requests (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id_alias TEXT UNIQUE NOT NULL,
+    full_name TEXT NOT NULL,
+    phone TEXT,
+    password_hash TEXT,
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+    role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    reviewed_at TIMESTAMPTZ,
+    reviewed_by UUID REFERENCES auth.users(id)
+);
+ALTER TABLE public.access_requests ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can submit access request" ON public.access_requests FOR INSERT WITH CHECK (true);
+CREATE POLICY "Users view own or pending requests" ON public.access_requests FOR SELECT USING (true);
+CREATE POLICY "Admins manage all requests" ON public.access_requests FOR ALL USING (public.is_admin());
 
 -- Auto-create profile trigger
 CREATE OR REPLACE FUNCTION public.handle_new_user() RETURNS TRIGGER AS $$
