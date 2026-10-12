@@ -2838,6 +2838,42 @@
   </div>
 </div>
 
+<!-- ==================== CHANGE PASSWORD MODAL ==================== -->
+<div class="modal-backdrop" id="changePasswordModal">
+  <div class="modal" style="max-width:440px;">
+    <button class="modal-close" id="closeChangePasswordModalBtn">&times;</button>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span style="font-size:1.6rem;">🔑</span>
+      <div>
+        <h3 style="margin:0;">Change Password</h3>
+        <p style="font-size:0.82rem;color:var(--muted);margin:2px 0 0 0;">Update your portal account credentials.</p>
+      </div>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label>Current Password</label>
+      <input type="password" id="currentPassInput" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label>New Password (min 6 characters)</label>
+      <input type="password" id="newPassInput" placeholder="••••••••" autocomplete="new-password">
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <label>Confirm New Password</label>
+      <input type="password" id="confirmPassInput" placeholder="••••••••" autocomplete="new-password">
+    </div>
+
+    <div id="changePassFeedback" class="note" style="min-height:18px;margin-bottom:14px;font-weight:600;"></div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn outline" id="cancelChangePassBtn" type="button">Cancel</button>
+      <button class="btn accent" id="submitChangePassBtn" type="button">Update Password</button>
+    </div>
+  </div>
+</div>
+
 <!-- ==================== CLOUD DATABASE SETTINGS MODAL ==================== -->
 <div class="modal-backdrop" id="cloudModal">
   <div class="modal" style="max-width:540px;">
@@ -24290,12 +24326,38 @@
             ID: ${escapeHtml(displayUserId)}
           </span>
         </div>
+        <button class="btn sm outline" id="openChangePassBtn" title="Change Password" style="border-color:#cbd5e1;color:var(--navy);background:#fff;margin-left:4px;">
+          🔑 Change Password
+        </button>
         <button class="btn sm outline" id="signOutBtn" title="Logout / Sign Out" style="border-color:#fca5a5;color:#b91c1c;background:#fff5f5;margin-left:4px;">
           🚪 Logout
         </button>
       </div>
     `;
+    document.getElementById('openChangePassBtn')?.addEventListener('click', openChangePasswordDialog);
     document.getElementById('signOutBtn')?.addEventListener('click', handleSignOut);
+  }
+
+  function openChangePasswordDialog() {
+    const modal = document.getElementById('changePasswordModal');
+    if (!modal) return;
+    const currentInput = document.getElementById('currentPassInput');
+    const newInput = document.getElementById('newPassInput');
+    const confirmInput = document.getElementById('confirmPassInput');
+    const feedback = document.getElementById('changePassFeedback');
+
+    if (currentInput) currentInput.value = '';
+    if (newInput) newInput.value = '';
+    if (confirmInput) confirmInput.value = '';
+    if (feedback) {
+      feedback.textContent = '';
+      feedback.style.color = '';
+    }
+    openModal('changePasswordModal');
+  }
+
+  function closeChangePasswordDialog() {
+    closeModal('changePasswordModal');
   }
 
   function openAuthModal() {
@@ -26515,7 +26577,7 @@
           <td>
             ${u.userId !== 'admin' ? `
               <button class="btn sm outline" data-action="delete-user" data-id="${escapeHtml(u.userId)}" style="border-color:#fca5a5;color:#b91c1c;padding:3px 8px;font-size:0.75rem;">
-                Revoke Access
+                🗑️ Delete User
               </button>
             ` : '<span style="font-size:0.75rem;color:var(--muted);">Root Administrator</span>'}
           </td>
@@ -26524,7 +26586,7 @@
       });
 
       usersTbody.querySelectorAll('button[data-action="delete-user"]').forEach(btn => {
-        btn.addEventListener('click', () => handleRevokeUser(btn.dataset.id));
+        btn.addEventListener('click', () => handleDeleteUser(btn.dataset.id));
       });
     }
   }
@@ -26575,16 +26637,41 @@
     }
   }
 
-  // Revoke User Access Handler
-  function handleRevokeUser(userId) {
-    if (userId === 'admin') {
-      alert("The root administrator account cannot be deleted.");
+  // Delete User Handler (Permanently deletes user, access requests, and history from root)
+  async function handleDeleteUser(userId) {
+    if (!userId) return;
+    const currentUserId = state.profile?.userId || '';
+    if (userId.toLowerCase() === 'admin' || userId.toLowerCase() === currentUserId.toLowerCase()) {
+      alert("You cannot delete the root administrator account or your own currently active session.");
       return;
     }
-    if (confirm(`Revoke portal access for examinee User ID "${userId}"?`)) {
+
+    if (confirm(`⚠️ PERMANENT ROOT DELETION\n\nAre you sure you want to permanently delete user "${userId}"?\n\nThis will remove their user credentials, access requests, and mock exam history.`)) {
+      // 1. Remove from local registered users
       const users = getRegisteredUsers().filter(u => u.userId.toLowerCase() !== userId.toLowerCase());
       saveRegisteredUsers(users);
-      showToast(`Access for User ID "${userId}" revoked.`);
+
+      // 2. Remove any associated access requests
+      const reqs = getAccessRequests().filter(r => r.userId.toLowerCase() !== userId.toLowerCase());
+      saveAccessRequests(reqs);
+
+      // 3. Clear user's local history if any
+      try {
+        localStorage.removeItem('cblr_history_' + userId);
+      } catch (e) {}
+
+      // 4. Central database purge if connected
+      if (state.isCloud && state.supabase) {
+        try {
+          await state.supabase.from('access_requests').delete().ilike('user_id_alias', userId);
+          await state.supabase.from('profiles').delete().ilike('id', userId);
+          await state.supabase.from('exam_history').delete().ilike('user_id', userId);
+        } catch (cloudErr) {
+          console.warn("Could not sync user deletion to Supabase cloud:", cloudErr);
+        }
+      }
+
+      showToast(`User "${userId}" has been permanently deleted.`);
       renderAdminDashboard();
     }
   }
@@ -27723,6 +27810,114 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
   document.getElementById('closeAuthModalBtn')?.addEventListener('click', () => closeModal('authModal'));
   document.getElementById('closeCloudModalBtn')?.addEventListener('click', () => closeModal('cloudModal'));
   document.getElementById('closeSchemaModalBtn')?.addEventListener('click', () => closeModal('schemaModal'));
+  document.getElementById('closeChangePasswordModalBtn')?.addEventListener('click', closeChangePasswordDialog);
+  document.getElementById('cancelChangePassBtn')?.addEventListener('click', closeChangePasswordDialog);
+
+  // Submit Password Change
+  document.getElementById('submitChangePassBtn')?.addEventListener('click', async () => {
+    const currentPass = document.getElementById('currentPassInput')?.value || '';
+    const newPass = document.getElementById('newPassInput')?.value || '';
+    const confirmPass = document.getElementById('confirmPassInput')?.value || '';
+    const feedback = document.getElementById('changePassFeedback');
+    const submitBtn = document.getElementById('submitChangePassBtn');
+
+    if (!feedback) return;
+    feedback.textContent = '';
+    feedback.style.color = 'var(--bad)';
+
+    if (!currentPass) {
+      feedback.textContent = 'Please enter your current password.';
+      return;
+    }
+    if (!newPass) {
+      feedback.textContent = 'Please enter a new password.';
+      return;
+    }
+    if (newPass.length < 6) {
+      feedback.textContent = 'New password must be at least 6 characters long.';
+      return;
+    }
+    if (newPass !== confirmPass) {
+      feedback.textContent = 'New passwords do not match. Please verify.';
+      return;
+    }
+
+    const currentUserId = state.profile?.userId;
+    if (!currentUserId) {
+      feedback.textContent = 'No active user session detected.';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Updating...';
+
+    try {
+      // 1. Verify and update in local user registry
+      const users = getRegisteredUsers();
+      const user = users.find(u => u.userId.toLowerCase() === currentUserId.toLowerCase());
+
+      if (user) {
+        if (user.password !== currentPass) {
+          feedback.textContent = 'Incorrect current password.';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Update Password';
+          return;
+        }
+        // Update user password
+        user.password = newPass;
+        saveRegisteredUsers(users);
+      } else {
+        // If not in registry yet (e.g. cloud profile), ensure added
+        users.push({
+          userId: currentUserId,
+          password: newPass,
+          fullName: state.profile.full_name || currentUserId,
+          phone: state.profile.phone || '',
+          role: state.profile.role || 'user',
+          status: 'approved',
+          createdAt: new Date().toISOString()
+        });
+        saveRegisteredUsers(users);
+      }
+
+      // Also update any matching access requests password so admin can view/manage
+      const reqs = getAccessRequests();
+      const matchedReq = reqs.find(r => r.userId.toLowerCase() === currentUserId.toLowerCase());
+      if (matchedReq) {
+        matchedReq.password = newPass;
+        saveAccessRequests(reqs);
+      }
+
+      // 2. If Supabase cloud is active, update cloud auth password
+      if (state.isCloud && state.supabase && state.user) {
+        try {
+          const { error: cloudPassErr } = await state.supabase.auth.updateUser({
+            password: newPass
+          });
+          if (cloudPassErr) {
+            console.warn("Supabase auth password update notice:", cloudPassErr.message);
+          }
+        } catch (cloudErr) {
+          console.warn("Cloud password sync caught exception:", cloudErr);
+        }
+      }
+
+      feedback.style.color = 'var(--good)';
+      feedback.textContent = '✅ Password successfully updated!';
+      showToast('Password updated successfully! 🔑');
+
+      setTimeout(() => {
+        closeChangePasswordDialog();
+      }, 700);
+
+    } catch (err) {
+      feedback.style.color = 'var(--bad)';
+      feedback.textContent = 'Error updating password: ' + err.message;
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Update Password';
+    }
+  });
 
   // Close modals on backdrop click
   document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
