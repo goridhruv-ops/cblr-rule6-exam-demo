@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 -- ==============================================================================
 CREATE TABLE IF NOT EXISTS public.questions (
     id TEXT PRIMARY KEY,
+    book TEXT DEFAULT 'Licensed to Clear (Prakash Khatri)',
     act TEXT NOT NULL,
     chapter TEXT NOT NULL,
     section TEXT DEFAULT 'General',
