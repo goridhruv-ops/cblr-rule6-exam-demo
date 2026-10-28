@@ -1828,6 +1828,246 @@
     font-size: 2.5rem;
     margin-bottom: 12px;
   }
+
+  /* ==========================================================================
+     Allied Acts Hub & Exam Countdown Milestone Styling
+     ========================================================================== */
+  .exam-countdown-banner {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .cd-main {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .cd-badge {
+    align-self: flex-start;
+    background: rgba(234, 179, 8, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .cd-countdown-box {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .cd-number {
+    font-size: 2.8rem;
+    font-weight: 900;
+    font-family: var(--mono);
+    color: #ffffff;
+    line-height: 1;
+    letter-spacing: -1px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .cd-label {
+    font-size: 1.05rem;
+    color: #cbd5e1;
+    font-weight: 500;
+  }
+  .cd-quick-stats {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .cd-stat-chip {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #f1f5f9;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  .cd-stat-chip.link {
+    color: #93c5fd;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .cd-stat-chip.link:hover {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+  }
+  .cd-details {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  .cd-details summary {
+    cursor: pointer;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    user-select: none;
+    outline: none;
+  }
+  .cd-details summary:hover {
+    color: #ffffff;
+  }
+  .cd-details-body {
+    margin-top: 10px;
+    font-size: 0.84rem;
+    line-height: 1.6;
+    color: #cbd5e1;
+  }
+  .cd-details-body ul {
+    margin: 6px 0 6px 18px;
+    padding: 0;
+  }
+  .cd-details-body li {
+    margin-bottom: 6px;
+  }
+  .cd-details-body code {
+    background: rgba(255,255,255,0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    color: #f8fafc;
+  }
+
+  /* Allied Acts Hub */
+  .allied-header-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .allied-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .allied-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .allied-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  .allied-card summary {
+    cursor: pointer;
+    outline: none;
+    list-style: none;
+  }
+  .allied-card summary::-webkit-details-marker {
+    display: none;
+  }
+  .allied-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .allied-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--navy-dark);
+    line-height: 1.35;
+  }
+  .allied-badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .allied-badge {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+  }
+  .allied-badge.reg {
+    background: #e0e7ff;
+    color: #3730a3;
+    border: 1px solid #c7d2fe;
+  }
+  .allied-badge.group {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+  }
+  .allied-badge.tier {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+  }
+  .allied-body {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .allied-hook-box {
+    background: #eff6ff;
+    border-left: 3px solid #2563eb;
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 12px;
+    font-size: 0.86rem;
+  }
+  .allied-hook-box strong {
+    color: #1e40af;
+  }
+  .allied-section-title {
+    font-weight: 700;
+    font-size: 0.86rem;
+    color: var(--navy);
+    margin: 10px 0 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .allied-list {
+    margin: 4px 0 10px 18px;
+    padding: 0;
+  }
+  .allied-list li {
+    margin-bottom: 4px;
+    font-size: 0.84rem;
+  }
+  .allied-traps-box {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-top: 10px;
+  }
+  .allied-traps-box .allied-section-title {
+    color: #b45309;
+    margin-top: 0;
+  }
+  .allied-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--line);
+  }
+
 </style>
 </head>
 <body>
@@ -1855,6 +2095,7 @@
   <nav class="tabs">
     <button data-tab="setup" class="active">Setup &amp; Quick Drills</button>
     <button data-tab="bank">Question Bank</button>
+    <button data-tab="allied">🏛️ Allied Acts &amp; PGAs</button>
     <button data-tab="history">History &amp; Error Log</button>
     <button data-tab="materials">📚 Study Material</button>
     <button data-tab="admin" id="adminTabBtn" class="admin-tab" style="display:none;">👑 Admin Console</button>
@@ -1924,6 +2165,35 @@
 
   <!-- ==================== SETUP TAB ==================== -->
   <div id="setupTab">
+    <!-- Live CBT Exam Countdown & Facts Banner -->
+    <div class="exam-countdown-banner" id="examCountdownBanner">
+      <div class="cd-main">
+        <div class="cd-badge">🎯 CBT EXAM MILESTONE</div>
+        <div class="cd-countdown-box">
+          <div class="cd-number" id="cdDaysNumber">--</div>
+          <div class="cd-label" id="cdDaysLabel">days to CBLR Rule 6 CBT Examination</div>
+        </div>
+        <div class="cd-quick-stats">
+          <span class="cd-stat-chip">⏱️ 150 Mins</span>
+          <span class="cd-stat-chip">📝 150 MCQs</span>
+          <span class="cd-stat-chip">🔥 +3 / -1 Marking</span>
+          <span class="cd-stat-chip">🎯 270 Qualifying (60%)</span>
+          <a href="https://cblms.gov.in" target="_blank" rel="noopener" class="cd-stat-chip link">🌐 CBLMS Portal ↗</a>
+        </div>
+      </div>
+      <details class="cd-details">
+        <summary><span>📌 Official Exam Notice &amp; Key Parameters (Public Notice 19/2026-27)</span></summary>
+        <div class="cd-details-body">
+          <ul>
+            <li><strong>Written CBT:</strong> March 2027, online computer-based test, 150 objective MCQs, 2½ hours (10:30 to 13:00), bilingual in English &amp; Hindi.</li>
+            <li><strong>Marking Scheme:</strong> +3 for correct answer, −1 penalty for wrong response. Maximum 450 marks, minimum qualifying threshold 270 marks (60%). Syllabus: Regulation 6(7) of CBLR 2018.</li>
+            <li><strong>Online Application:</strong> Strictly via the CBLMS portal (<code>cblms.gov.in</code>), fee ₹500, to the Policy Section of the Commissionerate of jurisdiction. Incomplete applications are rejected without refund.</li>
+            <li><strong>NACIN Mock Practice:</strong> Official dummy computer-based test paper hosted on NACIN portal (<code>nacin.gov.in</code>) from February 2027.</li>
+            <li><strong>Oral Examination:</strong> Second quarter of 2027 for candidates qualifying the written CBT (qualifying mark 60%).</li>
+          </ul>
+        </div>
+      </details>
+    </div>
     <div class="dashboard-grid">
       <div class="stat-card">
         <div class="label">Question Bank</div>
@@ -2311,6 +2581,67 @@
     </div>
   </div>
 
+  <!-- ==================== ALLIED ACTS & PGAs TAB ==================== -->
+  <div id="alliedTab" style="display:none;">
+    <div class="allied-header-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <div>
+          <h2>🏛️ Allied Acts &amp; Partner Government Agencies (PGAs) Hub</h2>
+          <p style="font-size:0.86rem;color:var(--muted);margin:4px 0 0 0;">
+            Interactive statutory matrix of 30+ Allied Laws, Nodal Regulators, Customs hooks (ss.11, 111, 112), governing rules, and high-yield exam traps.
+          </p>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn sm outline" id="alliedExpandAllBtn" type="button">Expand All</button>
+          <button class="btn sm outline" id="alliedCollapseAllBtn" type="button">Collapse All</button>
+        </div>
+      </div>
+
+      <!-- Allied Acts Statistics KPI Grid -->
+      <div class="dashboard-grid" style="margin-bottom:18px;">
+        <div class="stat-card">
+          <div class="label">Total Allied Statutes</div>
+          <div class="value" id="alliedStatTotal">30</div>
+          <div class="hint">Governing import / export</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Nodal Regulators</div>
+          <div class="value">22+</div>
+          <div class="hint">DGFT, FSSAI, CDSCO, MoEFCC, etc.</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Statutory Customs Links</div>
+          <div class="value">ss. 11, 111, 112</div>
+          <div class="hint">Prohibition &amp; confiscation hooks</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Syllabus Scope</div>
+          <div class="value" style="font-size:1.15rem;color:var(--good);display:flex;align-items:center;gap:6px;">
+            <span>Reg 6(7) CBLR</span>
+          </div>
+          <div class="hint">Official statutory coverage</div>
+        </div>
+      </div>
+
+      <!-- Live Search Bar -->
+      <div class="mat-search-bar" style="margin-bottom:14px;">
+        <span class="mat-search-icon">🔍</span>
+        <input type="text" id="alliedSearchInput" class="mat-search-input" placeholder="Search by Act name, section, rule, regulator (DGFT, FSSAI, etc.), penalty, or keyword...">
+      </div>
+
+      <!-- Domain Group Filter Pills -->
+      <div style="font-size:0.78rem;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Domain / Regulatory Area:</div>
+      <div class="mat-filter-pills" id="alliedGroupPills" style="margin-bottom:12px;"></div>
+
+      <!-- Tier Filter Pills -->
+      <div style="font-size:0.78rem;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Exam Scope Priority:</div>
+      <div class="mat-filter-pills" id="alliedTierPills"></div>
+    </div>
+
+    <!-- Allied Cards Container -->
+    <div id="alliedCardsList" class="allied-grid"></div>
+  </div>
+
   <!-- ==================== STUDY MATERIAL TAB ==================== -->
   <div id="materialsTab" style="display:none;">
 
@@ -2373,6 +2704,7 @@
         <button class="mat-filter-pill" data-cat="Valuation Rules" type="button">Valuation Rules</button>
         <button class="mat-filter-pill" data-cat="Foreign Trade Policy" type="button">Foreign Trade Policy</button>
         <button class="mat-filter-pill" data-cat="Allied Acts" type="button">Allied Acts</button>
+        <button class="mat-filter-pill" data-cat="Video Lectures" type="button">🎥 Video Lectures &amp; Courses</button>
         <button class="mat-filter-pill" data-cat="Question Bank Solutions" type="button">Question Bank Solutions</button>
       </div>
     </div>
@@ -2988,6 +3320,7 @@
         <option value="Valuation Rules">Valuation Rules</option>
         <option value="Foreign Trade Policy">Foreign Trade Policy</option>
         <option value="Allied Acts">Allied Acts</option>
+        <option value="Video Lectures">Video Lectures &amp; Courses</option>
         <option value="Question Bank Solutions">Question Bank Solutions</option>
       </select>
 
@@ -25135,6 +25468,174 @@
       file_format: "Policy Portal",
       file_size: "Official Portal",
       date: "2023-04-01"
+    },
+    {
+      id: "mat-seed-video-001",
+      title: "Salient Differences between Levy, Tax, Cess, Surcharge and Fee",
+      category: "Video Lectures",
+      url: "https://youtu.be/_b3VpQZvl8E",
+      description: "Mr. Viren C. Dayal (JBS Academy) lecture on fundamental constitutional and statutory distinctions under Customs Act Section 12, Article 265 of Constitution, and relevant CBIC notifications.",
+      contributor: "Viren C. Dayal (JBS Academy)",
+      type: "link",
+      file_format: "Video Lecture",
+      file_size: "YouTube HD",
+      date: "2024-06-27"
+    },
+    {
+      id: "mat-seed-video-002",
+      title: "How to Crack the CBLR Regulation 6 Exam (Strategy & Insights)",
+      category: "Video Lectures",
+      url: "https://youtu.be/GsJMRNpS9ho",
+      description: "Mr. Viren C. Dayal guiding examinees on syllabus breakdown, time management for 150 MCQs in 150 minutes, passing score thresholds, and essential books.",
+      contributor: "Viren C. Dayal (JBS Academy)",
+      type: "link",
+      file_format: "Strategy Session",
+      file_size: "YouTube HD",
+      date: "2024-06-27"
+    },
+    {
+      id: "mat-seed-video-003",
+      title: "Speaking Orders in Customs: Legality, Ingredients & Principles of Natural Justice",
+      category: "Video Lectures",
+      url: "https://youtu.be/LnYQ7kU2MzM",
+      description: "In-depth statutory lecture covering Sections 122 and 124 of the Customs Act, 1962: monetary limits of adjudication, show-cause notices, speaking order essentials, and appellate validity.",
+      contributor: "Viren C. Dayal (JBS Academy)",
+      type: "link",
+      file_format: "Video Lecture",
+      file_size: "YouTube HD",
+      date: "2024-06-27"
+    },
+    {
+      id: "mat-seed-video-004",
+      title: "Alternate Dispute Resolution: Advance Rulings in Customs (CAAR)",
+      category: "Video Lectures",
+      url: "https://youtu.be/yFW53kAvz3k",
+      description: "Customs Authority for Advance Rulings (CAAR) under Sections 28E through 28M and CAAR Regulations 2021. Binding force, question eligibility, and procedure.",
+      contributor: "Viren C. Dayal (JBS Academy)",
+      type: "link",
+      file_format: "Video Lecture",
+      file_size: "YouTube HD",
+      date: "2024-07-18"
+    },
+    {
+      id: "mat-seed-video-005",
+      title: "Customs (Appeals) Rules, 1982 & Appellate Remedies",
+      category: "Video Lectures",
+      url: "https://youtu.be/QQRIcGtyWZE",
+      description: "Statutory framework of Customs Appeals under Section 128: limitation periods, condonation of delay limits, Form CA-1 filing, and pre-deposit requirements under Section 129E.",
+      contributor: "Viren C. Dayal (JBS Academy)",
+      type: "link",
+      file_format: "Video Lecture",
+      file_size: "YouTube HD",
+      date: "2024-09-24"
+    },
+    {
+      id: "mat-seed-video-006",
+      title: "Short Levy & Recovery Provisions under Section 28 of Customs Act, 1962",
+      category: "Video Lectures",
+      url: "https://youtu.be/yI3gwHsTM6g",
+      description: "Comprehensive statutory analysis of normal period (2 years) vs extended period (5 years for collusion/willful misstatement), pre-notice consultation, and interest under 28AA.",
+      contributor: "Viren C. Dayal",
+      type: "link",
+      file_format: "Video Lecture",
+      file_size: "YouTube HD",
+      date: "2024-07-15"
+    },
+    {
+      id: "mat-seed-video-007",
+      title: "Provisional Assessment under Section 18 of Customs Act, 1962",
+      category: "Video Lectures",
+      url: "https://youtu.be/xsEVMtcETL0",
+      description: "Provisional assessment grounds, execution of bond and bank guarantee / security under Customs (Finalisation of Provisional Assessment) Regulations 2018.",
+      contributor: "Viren C. Dayal",
+      type: "link",
+      file_format: "Video Lecture",
+      file_size: "YouTube HD",
+      date: "2024-07-10"
+    },
+    {
+      id: "mat-seed-video-008",
+      title: "Section 110 of Customs Act: Power to Detain and Seize Goods",
+      category: "Video Lectures",
+      url: "https://www.youtube.com/live/QPlqiOQJm4c",
+      description: "Distinction between seizure and detention, notice period under Section 110(2) (6 months + 6 months extension), and provisional release under Section 110A.",
+      contributor: "Viren C. Dayal",
+      type: "link",
+      file_format: "Video Lecture",
+      file_size: "YouTube Live",
+      date: "2024-07-20"
+    },
+    {
+      id: "mat-seed-video-009",
+      title: "Bill of Entry (Electronic Integrated Declaration & Examination) Regulations, 2018",
+      category: "Video Lectures",
+      url: "https://youtu.be/oz3m5WbO-Uo",
+      description: "Section 46 statutory timeline for prior/advance filing of Bill of Entry, late fee provisions, self-assessment under Section 17, and faceless assessment procedures.",
+      contributor: "Viren C. Dayal",
+      type: "link",
+      file_format: "Video Lecture",
+      file_size: "YouTube HD",
+      date: "2024-07-05"
+    },
+    {
+      id: "mat-seed-video-010",
+      title: "Warehouse Goods Removal Regulations, 2016 & Chapter IX Procedures",
+      category: "Video Lectures",
+      url: "https://youtu.be/QkeNuff3EGs",
+      description: "Public, private, and special warehouses (Sections 57, 58, 58A), warehousing bond calculation (thrice the amount of duty under Section 59), and removal under Sections 71-72.",
+      contributor: "Viren C. Dayal",
+      type: "link",
+      file_format: "Video Lecture",
+      file_size: "YouTube HD",
+      date: "2024-07-22"
+    },
+    {
+      id: "mat-seed-video-011",
+      title: "Surrendering Title to Goods (Section 23) & Section 150 Sale Proceeds",
+      category: "Video Lectures",
+      url: "https://youtu.be/u5tO6xo5GvQ",
+      description: "Relinquishment of title to imported goods before order for clearance for home consumption (Section 23(2)) and priority order of application of sale proceeds under Section 150.",
+      contributor: "Viren C. Dayal",
+      type: "link",
+      file_format: "Video Lecture",
+      file_size: "YouTube HD",
+      date: "2024-07-25"
+    },
+    {
+      id: "mat-seed-video-012",
+      title: "Introduction to Allied Laws & PGAs in Customs Clearance",
+      category: "Video Lectures",
+      url: "https://youtu.be/Xc-RZE7egVk",
+      description: "Foundational lecture on how Allied Laws interface with Customs under Section 11 & Section 111(d), role of Partner Government Agencies (PGAs) on SWIFT ICEGATE.",
+      contributor: "Viren C. Dayal",
+      type: "link",
+      file_format: "Video Lecture",
+      file_size: "YouTube HD",
+      date: "2024-08-01"
+    },
+    {
+      id: "mat-seed-course-001",
+      title: "Regulation 6 Online Master Course & Past 4 Years Lecture Recordings",
+      category: "Video Lectures",
+      url: "https://learn.logiveda.com/bundles?bundle_id=regulation-6-online-course-4-years-recordings",
+      description: "Complete Logiveda master bundle by Mr. Viren C. Dayal containing multi-year lecture archives, topic-wise bare act coverage, and CBLR exam analysis.",
+      contributor: "Mr. Viren C. Dayal (Logiveda)",
+      type: "link",
+      file_format: "Master Course",
+      file_size: "Online Course Bundle",
+      date: "2024-08-15"
+    },
+    {
+      id: "mat-seed-course-002",
+      title: "Immunity from Prosecution: Settlement Commission in Customs",
+      category: "Video Lectures",
+      url: "https://learn.logiveda.com/course/settlement-commission-in-customs-mr-viren-c-dayal",
+      description: "Chapter XIVA (Sections 127A to 127N) Settlement Commission: conditions for making an application, full and true disclosure, and grant of immunity from prosecution and penalty.",
+      contributor: "Mr. Viren C. Dayal (Logiveda)",
+      type: "link",
+      file_format: "Master Course",
+      file_size: "Online Course",
+      date: "2024-08-20"
     }
   ];
 
@@ -25565,6 +26066,7 @@
       if (demoRoleBar) demoRoleBar.style.display = 'none';
       document.getElementById('setupTab').style.display = 'none';
       document.getElementById('bankTab').style.display = 'none';
+      document.getElementById('alliedTab').style.display = 'none';
       document.getElementById('historyTab').style.display = 'none';
       document.getElementById('materialsTab').style.display = 'none';
       document.getElementById('adminTab').style.display = 'none';
@@ -25582,6 +26084,7 @@
     const currentTab = activeTabBtn?.dataset?.tab || 'setup';
     document.getElementById('setupTab').style.display = currentTab === 'setup' ? 'block' : 'none';
     document.getElementById('bankTab').style.display = currentTab === 'bank' ? 'block' : 'none';
+    document.getElementById('alliedTab').style.display = currentTab === 'allied' ? 'block' : 'none';
     document.getElementById('historyTab').style.display = currentTab === 'history' ? 'block' : 'none';
     document.getElementById('materialsTab').style.display = currentTab === 'materials' ? 'block' : 'none';
     document.getElementById('adminTab').style.display = currentTab === 'admin' ? 'block' : 'none';
@@ -25734,10 +26237,12 @@
       const tab = btn.dataset.tab;
       document.getElementById('setupTab').style.display = tab === 'setup' ? 'block' : 'none';
       document.getElementById('bankTab').style.display = tab === 'bank' ? 'block' : 'none';
+      document.getElementById('alliedTab').style.display = tab === 'allied' ? 'block' : 'none';
       document.getElementById('historyTab').style.display = tab === 'history' ? 'block' : 'none';
       document.getElementById('materialsTab').style.display = tab === 'materials' ? 'block' : 'none';
       document.getElementById('adminTab').style.display = tab === 'admin' ? 'block' : 'none';
 
+      if (tab === 'allied') renderAlliedActsPortal();
       if (tab === 'history') renderHistory();
       if (tab === 'materials') renderMaterials();
       if (tab === 'admin') renderAdminDashboard();
@@ -26018,6 +26523,7 @@
     // Screen transition
     document.getElementById('setupTab').style.display = 'none';
     document.getElementById('bankTab').style.display = 'none';
+    document.getElementById('alliedTab').style.display = 'none';
     document.getElementById('historyTab').style.display = 'none';
     document.getElementById('materialsTab').style.display = 'none';
     document.getElementById('adminTab').style.display = 'none';
@@ -26885,12 +27391,24 @@
         <div class="review-details">
           ${optsHtml}
           ${item.explain ? `<div class="note" style="margin-top:8px;padding:8px 12px;background:var(--surface-2);border-radius:6px;font-size:0.82rem;"><strong>Official Statutory Note / Citation:</strong> ${escapeHtml(item.explain)}</div>` : ''}
+          <div style="margin-top:8px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
+            <button class="btn sm outline review-ai-prompt-btn" type="button" style="padding:2px 8px;font-size:0.75rem;border-color:#818cf8;color:#4338ca;background:#eef2ff;">
+              🤖 Copy AI Prompt
+            </button>
+            <a href="${getBareActSearchUrl(item)}" target="_blank" rel="noopener" class="btn sm outline" style="padding:2px 8px;font-size:0.75rem;text-decoration:none;border-color:#cbd5e1;color:var(--navy);background:#fff;">
+              📖 Bare Act Search ↗
+            </a>
+          </div>
         </div>
       `;
 
       div.querySelector('.review-bookmark-btn')?.addEventListener('click', (e) => {
         toggleBookmark(item.qId);
         e.target.textContent = state.bookmarks.has(item.qId) ? '⭐ Saved' : '☆ Bookmark';
+      });
+
+      div.querySelector('.review-ai-prompt-btn')?.addEventListener('click', (e) => {
+        copyQuestionAIPrompt(item, e.currentTarget);
       });
 
       reviewWrap.appendChild(div);
@@ -27517,17 +28035,25 @@
           <strong style="color:var(--good);">Answer: ${String.fromCharCode(65 + q.correct)}.</strong> ${escapeHtml(q.options[q.correct])}
           ${q.explain ? `· <span style="font-style:italic;">${escapeHtml(q.explain)}</span>` : ''}
         </div>
-        ${admin ? `
-          <div style="margin-top:6px;">
-            <button class="btn danger sm delete-q-btn" data-id="${q.id}">Delete Question</button>
-          </div>
-        ` : ''}
+        <div class="q-actions-bar" style="margin-top:8px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
+          <button class="btn sm outline bank-ai-prompt-btn" type="button" style="padding:2px 8px;font-size:0.75rem;border-color:#818cf8;color:#4338ca;background:#eef2ff;">
+            🤖 Copy AI Prompt
+          </button>
+          <a href="${getBareActSearchUrl(q)}" target="_blank" rel="noopener" class="btn sm outline" style="padding:2px 8px;font-size:0.75rem;text-decoration:none;border-color:#cbd5e1;color:var(--navy);background:#fff;">
+            📖 Bare Act Search ↗
+          </a>
+          ${admin ? `<button class="btn danger sm delete-q-btn" data-id="${q.id}" style="padding:2px 8px;font-size:0.75rem;">Delete Question</button>` : ''}
+        </div>
       `;
 
       row.querySelector('.bank-star-btn')?.addEventListener('click', (e) => {
         toggleBookmark(q.id);
         const nowSaved = state.bookmarks.has(q.id);
         e.target.textContent = nowSaved ? '⭐ Bookmarked' : '☆ Bookmark';
+      });
+
+      row.querySelector('.bank-ai-prompt-btn')?.addEventListener('click', (e) => {
+        copyQuestionAIPrompt(q, e.currentTarget);
       });
 
       if (admin) {
@@ -29427,6 +29953,410 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
   }
 
 })();
-</script>
+
+  // ==========================================================================
+  // ALLIED ACTS & PGAs DATA MATRIX & CONTROLLER
+  // ==========================================================================
+  const ALLIED_ACTS = [
+{id:"ftdr",g:0,t:"core",title:"Foreign Trade (Development & Regulation) Act, 1992 + Foreign Trade Policy",reg:"DGFT",
+ link:"s.3(3) makes goods prohibited under the FT(D&R) Act deemed prohibited under s.11 of the Customs Act, so s.111(d) confiscation follows.",
+ key:["s.3: Central Govt may regulate, prohibit or restrict imports/exports by Order; s.3(3) is the deeming link to Customs s.11","s.5: Foreign Trade Policy notified by Central Govt","s.7: IEC mandatory for import/export (exceptions per FTP)","s.8: suspension/cancellation of IEC","s.11: contravention, penalty (verify sub-sections)","Policy tools: ITC(HS) Schedule 1 (imports) and Schedule 2 (exports); import status Free / Restricted / Prohibited / STE","Handbook of Procedures and Appendices; Public Notices and Trade Notices by DGFT"],
+ rules:["Foreign Trade (Regulation) Rules, 1993 (verify)","Foreign Trade Policy 2023 and HBP (check current validity, verify)"],
+ traps:["Penalty under FTDR is by DGFT adjudication; confiscation is by Customs. Do not mix the two.","IEC holder must be named in the BOE/SB, a CHA cannot supply the IEC."]},
+{id:"fema",g:0,t:"core",title:"Foreign Exchange Management Act, 1999",reg:"RBI / ED",
+ link:"Export proceeds realisation, currency in baggage, import payments, and the AD bank link to BOE/SB data.",
+ key:["Civil law; replaced FERA 1973. Contravention leads to penalty via Enforcement Directorate adjudication, not prosecution (s.13, verify)","s.3: dealing in foreign exchange; s.7: export of goods and services (declaration); s.8: realisation and repatriation of foreign exchange","s.10: Authorised Persons (AD banks, money changers)","Export proceeds realisation period: 9 months from date of export, 15 months for warehoused exports (verify current RBI Master Direction)","Possession/export of currency: FEM (Export and Import of Currency) Regulations, 2015 (verify limits)","Import payments through AD bank; BOE reconciles with BoE Processing and Monitoring System (verify)"],
+ rules:["FEM (Export of Goods and Services) Regulations, 2015 (verify)","FEM (Export and Import of Currency) Regulations, 2015","RBI Master Direction: Export of Goods and Services; Import of Goods and Services (verify)"],
+ traps:["FEMA is civil, COFEPOSA is preventive detention, PMLA is criminal. Exams love this comparison.","Realisation time is in RBI directions, not in the Act itself."]},
+{id:"cofeposa",g:1,t:"core",title:"COFEPOSA, 1974 (Conservation of Foreign Exchange and Prevention of Smuggling Activities)",reg:"CEIB / State and Central Govt",
+ link:"Preventive detention of habitual smugglers and forex violators, used alongside Customs Act cases.",
+ key:["Preventive, not punitive; based on Art.22 of the Constitution","s.3: detention orders by Central/State Govt or specified officers","Grounds to be communicated to detenue within 5 days, up to 15 days in exceptional cases (verify)","Advisory Board review (s.8, verify); maximum detention period s.10 (verify, 1 year in standard cases)","Detaining authority acts on sponsoring authority's dossier (DRI, Customs, ED)"],
+ rules:["Constitution Art.22","Related: SAFEMA, 1976"],
+ traps:["Detention is a different track from adjudication or prosecution; both can run together.","Delay in executing or deciding representation can vitiate detention (case-law angle, verify)."]},
+{id:"safema",g:1,t:"core",title:"SAFEMA, 1976 (Smugglers and Foreign Exchange Manipulators (Forfeiture of Property) Act)",reg:"Competent Authority; Appellate Tribunal for Forfeited Property",
+ link:"Forfeits illegally acquired property of persons convicted/detained under COFEPOSA, NDPS, Customs Act offences (verify scope in s.2).",
+ key:["Applies to persons detained under COFEPOSA, convicted under Customs Act/NDPS and relatives/associates (verify categories)","Notice, hearing, forfeiture order by Competent Authority; appeal to the Appellate Tribunal","Forfeited property vests in Central Govt free of encumbrances (verify section)"],
+ rules:["Appellate Tribunal for Forfeited Property (ATFP)"],
+ traps:["SAFEMA targets property, COFEPOSA targets the person."]},
+{id:"ndps",g:2,t:"core",title:"Narcotic Drugs and Psychotropic Substances Act, 1985",reg:"Narcotics Control Bureau; Customs and DRI as enforcement officers",
+ link:"Customs officers hold NDPS powers (s.42, s.43, s.53 notifications); heavily tested for baggage and cargo seizures.",
+ key:["s.2: definitions; small / intermediate / commercial quantity set by notification (verify tables)","s.8: prohibition on cultivation, production, possession, import/export inter-State etc.","s.20 cannabis, s.21 manufactured drugs, s.22 psychotropic substances, s.23 illegal import/export/transhipment","s.27A: financing illicit traffic and harbouring offenders; s.29: abetment and conspiracy","s.35: presumption of culpable mental state; s.37: stringent bail conditions","s.42 / s.43: power of entry, search, seizure and arrest (without warrant, with conditions)","s.50: conditions for personal search (to be taken to Gazetted Officer or Magistrate)","s.52A: disposal and sampling of seized drugs; s.53: officers invested with police powers","s.67: power to call for information","s.64A: immunity to addicts volunteering for treatment"],
+ rules:["NDPS Rules, 1985 (import/export certificates and authorisations, verify)","NDPS (Regulation of Controlled Substances) Order, 2013 (precursors, verify)","Narcotics Commissioner, Gwalior grants import/export permission for narcotic drugs (verify)"],
+ traps:["Possession of commercial quantity attracts s.37 bail twin conditions.","Non-compliance with s.50 can vitiate recovery from the person; it does not apply to a bag (verify case-law).","Statements to NDPS officers: Tofan Singh v. State of Tamil Nadu (2020) held they are inadmissible as confession (verify)."]},
+{id:"arms",g:2,t:"core",title:"Arms Act, 1959 and Arms Rules, 2016",reg:"MHA; DGFT for import policy",
+ link:"Import/export of arms and ammunition is by licence and FTP authorisation; Customs seizes unlicensed items.",
+ key:["s.3: licence for acquisition, possession or carrying of firearms and ammunition","s.10: licence for import, export and transport of arms or ammunition (verify details)","s.25: punishment for contravention (verify imprisonment terms)","Import of arms and ammunition is Restricted/Prohibited under ITC(HS) Chapter 93 and needs a DGFT/MHA licence (verify)","Arms Rules, 2016 replace Arms Rules, 1962; forms and licences now online (verify)"],
+ rules:["Arms Rules, 2016","Chapter 93 of Customs Tariff"],
+ traps:["Check whether the item is arms, ammunition, or just an airgun/accessory before choosing the CTH."]},
+{id:"dca",g:2,t:"core",title:"Drugs and Cosmetics Act, 1940 + Drugs Rules, 1945 + Cosmetics Rules, 2020",reg:"CDSCO / DCGI; port offices",
+ link:"Imports of drugs and cosmetics need registration and import licence; Customs clears only against CDSCO NOC/licence.",
+ key:["Chapter III (ss.10-13): import of drugs and cosmetics. s.10 prohibits import of substandard, misbranded, spurious or adulterated drugs/cosmetics","s.11: Customs officers' powers regarding drugs; s.13: penalty for import contraventions (verify sub-sections)","s.18 / s.27: manufacture/sale prohibitions and penalties (verify)","Drugs Rules, 1945: import licence (Form 10 type) and registration certificate (Form 41 type), verify forms","Cosmetics Rules, 2020: registration of cosmetics for import, import licence (verify forms)","Medical Devices Rules, 2017 are made under this Act (verify)","Samples for test, examination or analysis: Drugs Rules provisions (verify)"],
+ rules:["Drugs Rules, 1945","Cosmetics Rules, 2020","Medical Devices Rules, 2017"],
+ traps:["Test licence/NOC is needed even for non-commercial samples (verify).","Shelf-life requirements at import are in the Rules, not in Customs circulars (verify)."]},
+{id:"ins",g:2,t:"core",title:"Insecticides Act, 1968 + Insecticides Rules, 1971",reg:"Central Insecticides Board and Registration Committee (CIB&RC); Plant Protection Adviser",
+ link:"Import of insecticides and pesticides needs CIB&RC registration and import licence; Customs checks before release.",
+ key:["Registration of each insecticide for import/manufacture by the Registration Committee (verify section)","Import licence/permit from the Plant Protection Adviser (verify forms in Rules)","Insecticide Inspector powers to take samples and seize; prosecution for contravention (verify sections)","Labelling and leaflet as per Rules (verify)"],
+ rules:["Insecticides Rules, 1971"],
+ traps:["Chapter 38 tariff classification does not replace the CIB&RC registration requirement."]},
+{id:"lmpc",g:3,t:"core",title:"Legal Metrology Act, 2009 + Legal Metrology (Packaged Commodities) Rules, 2011",reg:"Dept of Consumer Affairs; Controllers of Legal Metrology",
+ link:"Imported pre-packed goods must carry mandatory declarations before Customs clearance.",
+ key:["Rule 6(1) declarations: name and address of manufacturer/packer/importer, common or generic name, net quantity, month and year of manufacture/import, MRP (inclusive of all taxes), consumer care details, country of origin","Importer registration/declaration requirement for packaged commodities (Rule 27, verify)","Re-stickering/labelling of imported packages may be allowed in the bonded warehouse/CFS under conditions (verify, tie to s.? of Customs Act)","Exemptions for large wholesale packages and exports (verify Rule 3 thresholds)"],
+ rules:["LM (Packaged Commodities) Rules, 2011","LM (Numeration) Rules (verify)"],
+ traps:["MRP is unit sale price, not invoice value. Missing declarations can lead to detention, then re-labelling or re-export."]},
+{id:"fssa",g:3,t:"core",title:"Food Safety and Standards Act, 2006 + Import and Labelling Regulations",reg:"FSSAI",
+ link:"Food imports are cleared only after FSSAI Authorised Officer NOC at the port; largest allied topic in exams.",
+ key:["s.3: definitions; s.16: duties of the Food Authority; s.25: regulation of imports (unsafe, misbranded, substandard food not to be imported)","s.46: Food Analyst; s.47: sampling; penalties in Chapter IX (ss.48 onward; verify specific sections)","FSS (Import) Regulations, 2017: FBO Licence/Registration of importer, FSSAI NOC, sampling at port","Remaining shelf life at import: minimum 60% or 45 days, whichever is less (verify)","Rejected consignment options: re-export, destruction, diversion to non-food use (verify)","Labelling: FSS (Labelling and Display) Regulations, 2020 (verify); 2011 Regulations earlier","Food Import Clearance System (FICS) integrated with ICEGATE (verify)"],
+ rules:["FSS (Import) Regulations, 2017","FSS (Packaging) and (Labelling and Display) Regulations, 2020 (verify)","FSS (Licensing and Registration of Food Businesses) Regulations, 2011"],
+ traps:["Customs cannot release food on its own once FSSAI marks the sample 'non-conforming'.","Importer licence is required in addition to NOC."]},
+{id:"bis",g:3,t:"mine",title:"Bureau of Indian Standards Act, 2016 + Compulsory Registration / Quality Control Orders",reg:"BIS; DPIIT/ministries issue QCOs",
+ link:"Goods under QCO/CRO need BIS licence/registration; BOE data must carry the BIS number (verify).",
+ key:["BIS Act, 2016: Standards Mark, conformity assessment, compulsory certification via orders under s.16 (verify)","Compulsory Registration Order (CRO) for electronics and IT goods (IS 13252 family, verify)","QCOs are notified by product ministries and change often: check current list before clearing","Penalties for import without BIS conformity (verify)"],
+ rules:["Notified QCOs / CRO (verify current)","Related DGFT import restrictions (verify)"],
+ traps:["Many QCOs get stayed, extended or withdrawn. Always check the latest notification date."]},
+{id:"wpc",g:3,t:"mine",title:"Wireless / Telecom: WPC licensing and ETA (Telecommunications Act, 2023 replaces older telegraph laws, verify)",reg:"DoT, WPC Wing; TEC for MTCTE",
+ link:"Wireless equipment imports need WPC ETA/licence; telecom equipment may need TEC certification (verify).",
+ key:["Older base: Indian Wireless Telegraphy Act, 1933 and Indian Telegraph Act, 1885 (repealed/replaced by Telecommunications Act, 2023, verify extent)","Equipment Type Approval (ETA) for licence-exempt bands, now largely self-declaration (verify)","Import licence for restricted frequency devices (verify)","MTCTE certification for telecom equipment (verify)"],
+ rules:["Current DoT/WPC notifications (verify)"],
+ traps:["Transition from old laws to the 2023 Act is ongoing; do not quote repealed sections without checking."]},
+{id:"lsia",g:4,t:"core",title:"Live-Stock Importation Act, 1898",reg:"Dept of Animal Husbandry and Dairying; AQCS",
+ link:"Import of livestock and animal products is regulated through quarantine and health certification.",
+ key:["s.3: Central Govt may prohibit or regulate import of livestock or specified articles (verify)","Animal Quarantine and Certification Service (AQCS) at ports","Veterinary health certificate from exporting country; Sanitary Import Permit (verify)","Amended by Livestock Importation (Amendment) Act, 2001 (verify)"],
+ rules:["Livestock Importation Orders and Rules (verify)"],
+ traps:["Includes products such as meat, pet food and biological products: check Livestock Importation Rules."]},
+{id:"dipa",g:4,t:"core",title:"Destructive Insects and Pests Act, 1914",reg:"Plant Protection Adviser; DPPQS",
+ link:"Parent Act for plant quarantine import orders.",
+ key:["s.3: power to prohibit or regulate import of articles likely to carry pests (verify)","Plant Quarantine Order made under this Act: see next entry","Inspection, disinfection, destruction/return of infested consignments (verify)"],
+ rules:["PQ (Regulation of Import into India) Order, 2003"],
+ traps:["Questions often ask which Act the PQ Order is issued under."]},
+{id:"pq",g:4,t:"core",title:"Plant Quarantine (Regulation of Import into India) Order, 2003 and Plants, Fruits and Seeds Order, 1989",reg:"Directorate of Plant Protection, Quarantine and Storage (DPPQS)",
+ link:"Plant material and wood packaging need phytosanitary certificate and quarantine inspection.",
+ key:["Phytosanitary certificate from exporting country mandatory (verify exceptions)","Import Permit needed for specified plants/seeds (verify Schedule numbers)","Prohibited articles list and restricted articles list (verify Schedules)","Wood packaging material: ISPM-15 treatment mark","Plant Quarantine Station inspection at point of entry; fumigation/treatment charges","PFS Order, 1989 applies to plants, fruits and seeds, partly overlapping (verify superseded status)"],
+ rules:["PQ Order, 2003 and amendments","PFS (Regulation of Import into India) Order, 1989 (verify)"],
+ traps:["Wooden dunnage without ISPM-15 can lead to re-export even if the cargo itself is not plant-based."]},
+{id:"epa",g:5,t:"core",title:"Environment (Protection) Act, 1986 + Penalty and Adjudication Rules, 2024",reg:"MoEFCC; CPCB/SPCBs",
+ link:"Umbrella law for waste, hazardous chemical and ozone rules enforced at Customs.",
+ key:["s.3: Central Govt powers; s.6: rule-making on hazardous substances (verify); s.7: no emission beyond standards; s.8: handling of hazardous substances","Penalty provisions amended by Jan Vishwas / EP Amendment Act, 2023: monetary penalty by adjudicating officer (verify details)","EP (Adjudication of Penalty) Rules, 2024 (verify)","Many Rules below (HW, Plastic, Battery, E-waste) are made under this Act"],
+ rules:["Rules listed in the next entries"],
+ traps:["Before 2023, offences were criminal; the amended Act shifts many to penalties. Check the amendment year in the question."]},
+{id:"hwm",g:5,t:"core",title:"Hazardous and Other Wastes (Management and Transboundary Movement) Rules, 2016",reg:"MoEFCC; CPCB; DGFT",
+ link:"Import/export of hazardous and other wastes and Basel Convention compliance.",
+ key:["Implements the Basel Convention on transboundary movement of hazardous wastes","Schedules list hazardous wastes (Schedule III) and prohibited/permissible wastes for import-export (verify Schedule numbers)","Import of waste needs MoEFCC permission and DGFT licence where restricted","Authorisation by SPCB for handling; Customs checks documents and may sample (verify)","Basel Convention: prior informed consent concept"],
+ rules:["HOWM Rules, 2016 and amendments (verify)","DGFT Notifications on metal scrap imports (verify)"],
+ traps:["Metal scrap, e-waste and plastic waste have different rules; do not assume one regime."]},
+{id:"mshc",g:5,t:"core",title:"Manufacture, Storage and Import of Hazardous Chemical Rules, 1989",reg:"MoEFCC; CPCB; Port authorities",
+ link:"Importer duties for hazardous chemicals: safety data sheet, labelling, information to authorities.",
+ key:["Importer must provide information such as safety data to the concerned authority (verify rule number; likely Rule 18)","Schedules list hazardous chemicals with threshold quantities (verify)","Packing and labelling per the Rules (verify)"],
+ rules:["MSIHC Rules, 1989 (verify)"],
+ traps:["Customs clearance of chemicals often also needs Explosives (PESO) or Insecticides compliance, depending on product."]},
+{id:"pwm",g:5,t:"core",title:"Plastic Waste Management Rules, 2016 (as amended)",reg:"MoEFCC; CPCB",
+ link:"Import of plastic waste is restricted; importers of plastic packaging fall under EPR.",
+ key:["Producers, Importers and Brand Owners (PIBO) have Extended Producer Responsibility obligations (verify amendments 2022)","Import of plastic waste prohibited, with narrow exceptions (verify rule)","Single-use plastic items banned from 1 July 2022 (verify list and applicability to imports)","Minimum thickness of carry bags (verify)","EPR registration on CPCB portal"],
+ rules:["PWM Rules, 2016 and 2021/2022 amendments (verify)","CPCB EPR guidelines"],
+ traps:["Registration is on the importer, not the CHA."]},
+{id:"bwm",g:5,t:"core",title:"Battery Waste Management Rules, 2022",reg:"MoEFCC; CPCB",
+ link:"Producers including importers of batteries must register for EPR; used-battery imports regulated.",
+ key:["Producer includes importer; EPR obligation for collection and recycling targets (verify)","Registration on CPCB EPR portal","Covers all types of batteries: EV, portable, automotive, industrial (verify)","Import of battery waste/used batteries is restricted/prohibited (verify)"],
+ rules:["BWM Rules, 2022 and amendments (verify)"],
+ traps:["Customs may ask for EPR registration number for battery imports (verify practice)."]},
+{id:"ewaste",g:5,t:"core",title:"E-Waste (Management) Rules, 2022",reg:"MoEFCC; CPCB",
+ link:"Importers of listed EEE need EPR registration; e-waste imports are not freely allowed.",
+ key:["Producer includes importer of electrical and electronic equipment in Schedule I (verify)","EPR certificates, recycling targets, registration on portal","Import of e-waste is prohibited except under defined conditions (verify)","Refurbishers and recyclers have registration requirements (verify)"],
+ rules:["E-Waste (Management) Rules, 2022 (verify amendments)"],
+ traps:["Second-hand electronics usually fall under both FTP restrictions and e-waste rules."]},
+{id:"wpa",g:6,t:"core",title:"Wild Life (Protection) Act, 1972 + CITES",reg:"MoEFCC; Wildlife Crime Control Bureau; DGFT / CITES Management Authority",
+ link:"Trade in wildlife species and products is regulated; import/export needs CITES permits, Customs seizes violations.",
+ key:["Schedules I to VI classify species by protection level (verify post-2022 list)","s.9: prohibition of hunting; s.39: wildlife is Government property","s.43: transfer; s.44: dealers' licence; s.48A: transport restrictions (verify)","Penal provisions s.51 (verify) with higher punishment for Schedule I species","2022 Amendment inserted a Chapter on CITES implementation (verify section numbers)","CITES Appendices I, II, III: permits for import, export, re-export (verify)","Customs powers under the Act and WCCB's role"],
+ rules:["CITES Convention","DGFT policy on wildlife items (verify)"],
+ traps:["CITES Appendix is not the same as WPA Schedule. Check both."]},
+{id:"aata",g:6,t:"maybe",title:"Antiquities and Art Treasures Act, 1972",reg:"ASI",
+ link:"Export of antiquities (100 years old or more) is prohibited except by Central Govt.",
+ key:["Antiquity definition: not less than 100 years old (verify)","Export only by the Central Government or authorised agency","Registration of antiquities (verify)"],
+ rules:["Verify any Customs Tariff/ITC(HS) linkage"],
+ traps:["Check whether the item is an antiquity before export documentation."]},
+{id:"ipr",g:7,t:"core",title:"IPR Enforcement at the border: IPR (Imported Goods) Enforcement Rules, 2007 + Trade Marks, Copyright, Patents, Designs, GI Acts",reg:"CBIC; rights holders; courts",
+ link:"s.11(2)(n) of Customs Act (prohibition for protection of patents, trademarks, copyrights) and the Rules let Customs suspend release of infringing imports.",
+ key:["IPR (Imported Goods) Enforcement Rules, 2007: rights holder records the right with Customs and gives notice; Customs suspends clearance; bond/security rules (verify rule numbers)","Copyright Act, 1957: s.51 infringement, s.53 importation of infringing copies (verify)","Trade Marks Act, 1999: infringement and counterfeit goods (verify sections)","Patents Act, 1970; Designs Act, 2000; Geographical Indications of Goods Act, 1999","Parallel imports and grey market issues (verify)"],
+ rules:["IPR (Imported Goods) Enforcement Rules, 2007","CBIC circulars on IPR enforcement (verify)","Notification on prohibiting IPR infringing goods under s.11 (verify)"],
+ traps:["Exports are not covered by the 2007 Rules; they cover imported goods only (verify)."]},
+{id:"poca",g:8,t:"core",title:"Prevention of Corruption Act, 1988",reg:"CBI, CVC, Lokpal",
+ link:"CHA staff dealing with officers: bribery is an offence and a ground for licence action under CBLR.",
+ key:["s.2: definition of public servant","s.7: public servant taking undue advantage; s.7A for influence (verify)","s.8: offence of bribing a public servant (2018 amendment)","s.9: offence by commercial organisation, adequate procedures defence (verify)","s.13: criminal misconduct","s.17A: prior approval for enquiry into decisions by public servants (verify)","s.19: sanction for prosecution"],
+ rules:["CBLR 2018 Reg 10 obligations and Reg 14/18 for penalty/revocation (verify)"],
+ traps:["Giver and taker are both liable after 2018."]},
+{id:"pmla",g:8,t:"maybe",title:"Prevention of Money Laundering Act, 2002",reg:"Enforcement Directorate; FIU",
+ link:"Certain Customs Act offences are scheduled offences under PMLA (verify).",
+ key:["Scheduled offences incl. Customs Act and NDPS provisions (verify)","Attachment and confiscation of proceeds of crime","Reporting entities (verify applicability to CHAs)"],
+ rules:["PMLA Rules (verify)"],
+ traps:["ED, not Customs, is the PMLA investigating agency."]},
+{id:"explosives",g:9,t:"maybe",title:"Explosives Act, 1884 + Explosives Rules, 2008 (and Petroleum Act, 1934)",reg:"PESO",
+ link:"Import of explosives, fireworks, compressed gases needs PESO licence; Customs checks before release.",
+ key:["Import licence from PESO controller (verify forms)","Port-wise restrictions on landing explosives (verify)","Petroleum Act and Rules for petroleum products import (verify)"],
+ rules:["Explosives Rules, 2008; Gas Cylinder Rules; Static and Mobile Pressure Vessels Rules (verify)"],
+ traps:["Common in chemicals, fireworks and cylinder consignments."]},
+{id:"ods",g:9,t:"maybe",title:"Ozone Depleting Substances (Regulation and Control) Rules, 2000 + Montreal Protocol / Kigali",reg:"MoEFCC; DGFT",
+ link:"Import of ODS and HFC is restricted and licensed.",
+ key:["Import of CFCs and other ODS prohibited/restricted per Rules and DGFT (verify)","HFC phase-down under Kigali Amendment (verify India's schedule)","Registration and quota systems (verify)"],
+ rules:["ODS Rules, 2000 and amendments (verify)"],
+ traps:["Refrigerant gas imports (R-22, HFC blends) need licence checks."]},
+{id:"aeact",g:9,t:"maybe",title:"Atomic Energy Act, 1962 and Radiation Protection Rules",reg:"AERB; DAE",
+ link:"Import of radioactive material and radiation devices needs AERB permission (verify).",
+ key:["AERB consent for import and handling of radioactive sources (verify)","Customs radiation detection at ports (verify)"],
+ rules:["AERB regulations (verify)"],
+ traps:["Check for medical and industrial imaging devices."]},
+{id:"eic",g:9,t:"maybe",title:"Export (Quality Control and Inspection) Act, 1963 and commodity boards (Tea, Coffee, Spices, MPEDA, APEDA)",reg:"EIC; commodity boards",
+ link:"Certain exports need pre-shipment inspection or registration with export promotion boards.",
+ key:["EIC certification for notified commodities (verify list)","APEDA and MPEDA registration for agri and marine exports (verify)","Spices Board, Coffee Board, Tea Board registrations (verify)"],
+ rules:["Export (Quality Control and Inspection) Rules (verify)"],
+ traps:["Check whether the commodity is notified before filing the SB."]},
+{id:"gst",g:0,t:"core",title:"GST in Customs: IGST on imports, Compensation Cess",reg:"CBIC; GST Council",
+ link:"Integrated tax on imports is levied under the Customs Tariff Act, 1975 (verify details).",
+ key:["s.3(7) CTA: IGST on imports equal to IGST Act levy","s.3(9) CTA: GST Compensation Cess on imports (verify, and check current status)","s.3(12) CTA: Customs Act provisions apply to IGST (verify)","Input tax credit on BOE-paid IGST under CGST Act (verify)","Export under LUT or on payment of IGST with refund (verify)"],
+ rules:["IGST Act, 2017 s.5 (verify)","Notification rates for IGST on imports (verify)"],
+ traps:["Value for IGST is assessable value plus BCD plus SWS etc. Check cascading."]}
+];
+  const ALLIED_GROUPS = ["Trade & forex","Detention & forfeiture","Drugs & arms","Food, metrology & standards","Quarantine","Environment & waste","Wildlife & heritage","IPR","Integrity & money","Other (verify)"];
+  const ALLIED_TIERS = {core:"Core list", mine:"In your brief", maybe:"Possible (verify)"};
+
+  let alliedSelectedGroup = -1;
+  let alliedSelectedTier = '';
+  let alliedSearchQuery = '';
+
+  function initExamCountdown() {
+    const numEl = document.getElementById('cdDaysNumber');
+    const lblEl = document.getElementById('cdDaysLabel');
+    if (!numEl || !lblEl) return;
+
+    const now = new Date();
+    // CBT Exam target: March 1, 2027
+    const examDate = new Date(2027, 2, 1);
+    const msPerDay = 86400000;
+    const days = Math.max(0, Math.ceil((examDate - now) / msPerDay));
+
+    numEl.textContent = days;
+    lblEl.textContent = 'days to March 2027 CBT Examination (target 1 March 2027)';
+  }
+
+  function buildQuestionAIStudyPrompt(q) {
+    const letters = ['A', 'B', 'C', 'D'];
+    const opts = (q.options || []).map((o, i) => letters[i] + '. ' + o).join('\n');
+    const correctLetter = letters[q.correct] || 'A';
+    const correctText = (q.options || [])[q.correct] || '';
+    return 'I am preparing for the Customs Brokers Licensing Regulations (CBLR 2018) Rule 6 Examination conducted by DGPM / CBIC.\n\n' +
+      'Please explain the following exam question in depth with statutory precision:\n' +
+      'Law/Act: ' + (q.act || 'Customs Act, 1962') + '\n' +
+      'Topic/Chapter: ' + (q.chapter || 'Customs Clearance & Procedures') + '\n' +
+      'Section/Rule: ' + (q.section || 'Applicable statutory provisions') + '\n\n' +
+      'Question:\n"' + q.text + '"\n\n' +
+      'Options:\n' + opts + '\n\n' +
+      'Official Correct Answer:\n' + correctLetter + '. ' + correctText + '\n' +
+      (q.explain ? ('Official Explanatory Note: ' + q.explain + '\n') : '') + '\n' +
+      'Please provide:\n' +
+      '1. Statutory Basis: Exact bare act section, regulation number, notification, or circular governing this.\n' +
+      '2. Conceptual Rationale: Why the official answer is correct and why each other option is legally incorrect.\n' +
+      '3. Exam Traps & Practical Customs Angle: Common traps examinees fall into on this topic in CBLR exams.\n' +
+      '4. Related Provisions: 2-3 cross-references to read alongside this provision.';
+  }
+
+  function copyQuestionAIPrompt(q, btn) {
+    const p = buildQuestionAIStudyPrompt(q);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(p).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '✅ Copied!';
+        setTimeout(() => { btn.innerHTML = orig; }, 2000);
+        showToast("AI Study Prompt copied! Paste into ChatGPT, Gemini, or Claude.");
+      }).catch(() => { prompt("Copy this AI Study Prompt (Ctrl+C / Cmd+C):", p); });
+    } else {
+      prompt("Copy this AI Study Prompt (Ctrl+C / Cmd+C):", p);
+    }
+  }
+
+  function getBareActSearchUrl(q) {
+    const query = ((q.act || 'Customs Act 1962') + ' ' + (q.section || '') + ' bare act indiacode cbic').trim();
+    return 'https://www.google.com/search?q=' + encodeURIComponent(query);
+  }
+
+  function renderAlliedActsPortal() {
+    const container = document.getElementById('alliedCardsList');
+    const groupPillsWrap = document.getElementById('alliedGroupPills');
+    const tierPillsWrap = document.getElementById('alliedTierPills');
+    const searchInput = document.getElementById('alliedSearchInput');
+    if (!container) return;
+
+    // Render Group Pills
+    if (groupPillsWrap && groupPillsWrap.children.length === 0) {
+      let gHtml = '<button class="mat-filter-pill active" data-g="-1" type="button">All Categories</button>';
+      ALLIED_GROUPS.forEach((name, i) => {
+        gHtml += '<button class="mat-filter-pill" data-g="' + i + '" type="button">' + escapeHtml(name) + '</button>';
+      });
+      groupPillsWrap.innerHTML = gHtml;
+      groupPillsWrap.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          groupPillsWrap.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          alliedSelectedGroup = parseInt(btn.dataset.g, 10);
+          drawAlliedCards();
+        });
+      });
+    }
+
+    // Render Tier Pills
+    if (tierPillsWrap && tierPillsWrap.children.length === 0) {
+      let tHtml = '<button class="mat-filter-pill active" data-t="" type="button">All Scopes</button>';
+      Object.keys(ALLIED_TIERS).forEach(k => {
+        tHtml += '<button class="mat-filter-pill" data-t="' + k + '" type="button">' + escapeHtml(ALLIED_TIERS[k]) + '</button>';
+      });
+      tierPillsWrap.innerHTML = tHtml;
+      tierPillsWrap.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          tierPillsWrap.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          alliedSelectedTier = btn.dataset.t;
+          drawAlliedCards();
+        });
+      });
+    }
+
+    // Live search listener
+    if (searchInput && !searchInput.dataset.bound) {
+      searchInput.dataset.bound = "true";
+      searchInput.addEventListener('input', (e) => {
+        alliedSearchQuery = (e.target.value || '').trim().toLowerCase();
+        drawAlliedCards();
+      });
+    }
+
+    // Expand / Collapse All listeners
+    const expBtn = document.getElementById('alliedExpandAllBtn');
+    const colBtn = document.getElementById('alliedCollapseAllBtn');
+    if (expBtn && !expBtn.dataset.bound) {
+      expBtn.dataset.bound = "true";
+      expBtn.addEventListener('click', () => {
+        document.querySelectorAll('#alliedCardsList details.allied-card').forEach(d => d.open = true);
+      });
+    }
+    if (colBtn && !colBtn.dataset.bound) {
+      colBtn.dataset.bound = "true";
+      colBtn.addEventListener('click', () => {
+        document.querySelectorAll('#alliedCardsList details.allied-card').forEach(d => d.open = false);
+      });
+    }
+
+    drawAlliedCards();
+  }
+
+  function drawAlliedCards() {
+    const container = document.getElementById('alliedCardsList');
+    if (!container) return;
+
+    const filtered = ALLIED_ACTS.filter(a => {
+      const matchGroup = alliedSelectedGroup < 0 || a.g === alliedSelectedGroup;
+      const matchTier = !alliedSelectedTier || a.t === alliedSelectedTier;
+      const q = alliedSearchQuery;
+      const matchSearch = !q || (
+        (a.title || '').toLowerCase().includes(q) ||
+        (a.reg || '').toLowerCase().includes(q) ||
+        (a.link || '').toLowerCase().includes(q) ||
+        (a.key || []).join(' ').toLowerCase().includes(q) ||
+        (a.rules || []).join(' ').toLowerCase().includes(q) ||
+        (a.traps || []).join(' ').toLowerCase().includes(q)
+      );
+      return matchGroup && matchTier && matchSearch;
+    });
+
+    const statTotalEl = document.getElementById('alliedStatTotal');
+    if (statTotalEl) statTotalEl.textContent = filtered.length;
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="mat-empty-state">' +
+        '<div class="mat-empty-state-icon">🏛️</div>' +
+        '<div style="font-size:1.05rem;font-weight:700;color:var(--navy);margin-bottom:6px;">No Matching Allied Acts Found</div>' +
+        '<p style="font-size:0.86rem;max-width:440px;margin:0 auto;">No allied statutes matched your current search query or filter. Try clearing your search or switching to "All Categories".</p>' +
+        '</div>';
+      return;
+    }
+
+    container.innerHTML = '';
+    filtered.forEach(a => {
+      const card = document.createElement('details');
+      card.className = 'allied-card';
+      const groupName = ALLIED_GROUPS[a.g] || 'General';
+      const tierName = ALLIED_TIERS[a.t] || 'Core';
+
+      const keyListHtml = (a.key || []).map(k => '<li>' + escapeHtml(k) + '</li>').join('');
+      const rulesListHtml = (a.rules || []).map(r => '<li>' + escapeHtml(r) + '</li>').join('');
+      const trapsListHtml = (a.traps || []).map(t => '<li>' + escapeHtml(t) + '</li>').join('');
+
+      card.innerHTML = '<summary>' +
+        '<div class="allied-card-header">' +
+          '<div>' +
+            '<div class="allied-title">⚖️ ' + escapeHtml(a.title) + '</div>' +
+            '<div class="allied-badges">' +
+              '<span class="allied-badge reg">🏛️ ' + escapeHtml(a.reg || 'PGA') + '</span>' +
+              '<span class="allied-badge group">📁 ' + escapeHtml(groupName) + '</span>' +
+              '<span class="allied-badge tier">⭐ ' + escapeHtml(tierName) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<span style="font-size:0.75rem;color:var(--muted);font-weight:600;">▼ Tap to View</span>' +
+        '</div>' +
+      '</summary>' +
+      '<div class="allied-body">' +
+        '<div class="allied-hook-box">' +
+          '<strong>🔗 Customs Statutory Hook:</strong> ' + escapeHtml(a.link) +
+        '</div>' +
+        '<div class="allied-section-title">📌 Key Statutory Provisions:</div>' +
+        '<ul class="allied-list">' + keyListHtml + '</ul>' +
+        (rulesListHtml ? ('<div class="allied-section-title">📜 Governing Rules &amp; Regulations:</div><ul class="allied-list">' + rulesListHtml + '</ul>') : '') +
+        (trapsListHtml ? ('<div class="allied-traps-box"><div class="allied-section-title">⚠️ High-Yield Exam Traps &amp; Distinctions:</div><ul class="allied-list" style="color:#92400e;">' + trapsListHtml + '</ul></div>') : '') +
+        '<div class="allied-actions">' +
+          '<button class="btn sm brass allied-copy-prompt-btn" type="button" data-id="' + a.id + '">🤖 Copy AI Study Prompt</button>' +
+          '<a href="https://www.google.com/search?q=' + encodeURIComponent(a.title + ' bare act indiacode cbic') + '" target="_blank" rel="noopener" class="btn sm outline" style="text-decoration:none;">🔍 Search Bare Act ↗</a>' +
+          '<button class="btn sm outline allied-practice-btn" type="button" data-title="' + escapeHtml(a.title) + '">🎯 Practice MCQs in Bank</button>' +
+        '</div>' +
+      '</div>';
+
+      card.querySelector('.allied-copy-prompt-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const p = 'I am preparing for the Customs Brokers Licensing Regulations (CBLR 2018) Regulation 6 Examination conducted by DGPM / CBIC.\n' +
+          'Teach me "' + a.title + '" as it applies to Customs clearance:\n' +
+          '1. Key sections and regulations to remember.\n' +
+          '2. Statutory links to Customs Act 1962 (such as Sections 11, 111, 112, 125).\n' +
+          '3. 5 high-yield exam traps or tricky distinctions often tested.\n' +
+          '4. 5 authentic exam-style MCQs with detailed explanations for each option.\n' +
+          'Cite only authentic statutory provisions you are sure of.';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(p).then(() => {
+            const btn = card.querySelector('.allied-copy-prompt-btn');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '✅ Copied!';
+            setTimeout(() => { btn.innerHTML = orig; }, 2000);
+            showToast("AI Study Prompt copied! Paste into ChatGPT, Gemini, or Claude.");
+          }).catch(() => { prompt("Copy this prompt:", p); });
+        } else {
+          prompt("Copy this prompt:", p);
+        }
+      });
+
+      card.querySelector('.allied-practice-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const bankTabBtn = document.querySelector('nav.tabs button[data-tab="bank"]');
+        if (bankTabBtn) {
+          bankTabBtn.click();
+          const searchInput = document.getElementById('bankSearch');
+          if (searchInput) {
+            const kw = a.title.split(' ')[0];
+            searchInput.value = kw;
+            renderBankList(true);
+            showToast('Filtered Question Bank for: ' + kw);
+          }
+        }
+      });
+
+      container.appendChild(card);
+    });
+  }
+
+
+  </script>
 </body>
 </html>
