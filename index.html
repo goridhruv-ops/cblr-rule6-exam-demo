@@ -2781,7 +2781,12 @@
 
     <!-- Registered Candidates Table -->
     <div class="card">
-      <h2>Registered Examinees Roster</h2>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+        <h2 style="margin:0;">Registered Examinees Roster</h2>
+        <button class="btn sm brass" id="openDirectAddUserModalBtn" type="button" style="display:inline-flex;align-items:center;gap:6px;">
+          ➕ Add Examinee Directly
+        </button>
+      </div>
       <div style="overflow-x:auto;">
         <table id="adminUsersTable">
           <thead>
@@ -3344,6 +3349,44 @@
 </div>
 
 <!-- ==================== ADMIN OFFICIAL FILE UPLOAD MODAL ==================== -->
+<!-- ==================== DIRECT ADD USER MODAL (Admin Only) ==================== -->
+<div class="modal-backdrop" id="directAddUserModal">
+  <div class="modal" style="max-width:480px;">
+    <button class="modal-close" id="closeDirectAddUserModalBtn" type="button" aria-label="Close Modal">&times;</button>
+    <h3>➕ Add Examinee Directly <span class="role-badge admin" style="font-size:0.75rem;">Admin</span></h3>
+    <p style="font-size:0.85rem;color:var(--muted);margin-top:-6px;">
+      Directly provision an approved examinee or administrator account without requiring a public access request.
+    </p>
+
+    <form id="directAddUserForm" onsubmit="return false;">
+      <label for="directUserId">User ID <span style="color:var(--bad);">*</span></label>
+      <input type="text" id="directUserId" placeholder="e.g. adv_kunal or examinee_2027" required autocomplete="off">
+
+      <label for="directFullName">Full Name <span style="color:var(--bad);">*</span></label>
+      <input type="text" id="directFullName" placeholder="e.g. Adv. Kunal Mehta" required>
+
+      <label for="directPhone">Phone Number</label>
+      <input type="tel" id="directPhone" placeholder="+91 98765 43210">
+
+      <label for="directPassword">Password <span style="color:var(--bad);">*</span></label>
+      <input type="text" id="directPassword" placeholder="Minimum 6 characters" required value="password123">
+
+      <label for="directUserRole">Account Role</label>
+      <select id="directUserRole">
+        <option value="user" selected>👤 Examinee (Candidate Access)</option>
+        <option value="admin">👑 Administrator (Full Control)</option>
+      </select>
+
+      <div id="directAddUserFeedback" class="note" style="min-height:18px;margin:10px 0;font-weight:600;"></div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+        <button class="btn outline" id="cancelDirectAddUserBtn" type="button">Cancel</button>
+        <button class="btn accent" id="submitDirectAddUserBtn" type="button">Create Account</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="adminFileUploadModal">
   <div class="modal" style="max-width:540px;">
     <button class="modal-close" id="closeAdminUploadModalBtn" type="button" aria-label="Close Modal">&times;</button>
@@ -28484,14 +28527,25 @@
 
   // ==========================================================================
 
-  // Sync pending and approved access requests from Supabase
+  // Fast helper to abort slow cloud queries so UI never freezes
+  function withTimeout(promise, ms = 3000) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Cloud request timeout')), ms))
+    ]);
+  }
+
+  // Sync pending and approved access requests from Supabase (Optimized with 2.5s timeout)
   async function syncAccessRequestsFromCloud() {
     if (!state.isCloud || !state.supabase) return;
     try {
-      const { data, error } = await state.supabase
-        .from('access_requests')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const { data, error } = await withTimeout(
+        state.supabase
+          .from('access_requests')
+          .select('*')
+          .order('created_at', { ascending: false }),
+        2500
+      );
 
       if (!error && Array.isArray(data)) {
         const localReqs = getAccessRequests();
@@ -29046,38 +29100,118 @@
     btn.textContent = 'Verifying credentials...';
 
     try {
-      // Sync access requests from cloud first if connected
-      if (state.isCloud && state.supabase) {
-        try {
-          await syncAccessRequestsFromCloud();
-        } catch(e) {}
+      // ⚡ INSTANT LOCAL CHECK FIRST (Zero latency, sub-millisecond response!)
+      const localUsers = getRegisteredUsers();
+      let user = localUsers.find(u => 
+        (u.userId && u.userId.toLowerCase() === userId) || 
+        (u.email && u.email.toLowerCase() === userId)
+      );
+
+      // Root administrator alias mapping
+      if (!user && (userId === 'goridhruv1@gmail.com' || userId === 'admin@cblr.portal' || userId === 'admin')) {
+        user = localUsers.find(u => u.userId.toLowerCase() === 'admin');
       }
 
-      // 1. Check if User ID is in Pending Access Requests
+      // If found in local registry with matching password, log in immediately without blocking on network!
+      if (user && user.password === pass) {
+        state.demoLoggedIn = true;
+        state.demoRole = user.role || 'user';
+        state.profile = {
+          id: user.userId,
+          userId: user.userId,
+          email: user.email || (user.userId + '@cblr.portal'),
+          phone: user.phone || '',
+          role: user.role,
+          full_name: user.fullName || user.userId
+        };
+
+        savePortalSession({
+          loggedIn: true,
+          mode: 'userid',
+          userId: user.userId,
+          email: user.email || (user.userId + '@cblr.portal'),
+          phone: user.phone || '',
+          role: user.role,
+          fullName: user.fullName || user.userId
+        });
+
+        closeAuthModal();
+        updateUserInterface();
+        // Load data in background
+        loadData().catch(() => {});
+        showToast(`Welcome back, ${user.fullName}! Logged in as ${user.role === 'admin' ? '👑 Admin' : '👤 Examinee'}.`);
+        btn.disabled = false;
+        btn.textContent = 'Sign In with User ID';
+        return;
+      }
+
+      // ⚡ If password was wrong on local account, give instant feedback
+      if (user && user.password !== pass) {
+        errEl.textContent = 'Incorrect password. Please try again.';
+        btn.disabled = false;
+        btn.textContent = 'Sign In with User ID';
+        return;
+      }
+
+      // ⚡ FAST CLOUD CHECK WITH 2.5s TIMEOUT (Only for new examinees not yet synced locally)
       let requests = getAccessRequests();
       let existingReq = requests.find(r => r.userId.toLowerCase() === userId);
 
-      // Fallback query directly to cloud if not in local memory
-      if (!existingReq && state.isCloud && state.supabase) {
+      if (state.isCloud && state.supabase) {
         try {
-          const { data: cloudReq } = await state.supabase
-            .from('access_requests')
-            .select('*')
-            .ilike('user_id_alias', rawUserId)
-            .maybeSingle();
-
-          if (cloudReq) {
-            existingReq = {
-              id: cloudReq.id,
-              userId: cloudReq.user_id_alias,
-              password: cloudReq.password_hash || '',
-              fullName: cloudReq.full_name || cloudReq.user_id_alias,
-              phone: cloudReq.phone || '',
-              role: cloudReq.role || 'user',
-              status: cloudReq.status || 'pending'
-            };
+          // Direct email auth check
+          if (rawUserId.includes('@')) {
+            const { data: authData, error: authErr } = await withTimeout(
+              state.supabase.auth.signInWithPassword({ email: rawUserId, password: pass }),
+              2500
+            );
+            if (!authErr && authData && authData.user) {
+              state.user = authData.user;
+              await fetchUserProfile(authData.user);
+              savePortalSession({
+                loggedIn: true,
+                mode: 'cloud',
+                userId: authData.user.id,
+                email: authData.user.email,
+                role: state.profile?.role || 'admin',
+                fullName: state.profile?.full_name || authData.user.email
+              });
+              closeAuthModal();
+              updateUserInterface();
+              loadData().catch(() => {});
+              showToast(`Welcome back, ${state.profile?.full_name || authData.user.email}!`);
+              btn.disabled = false;
+              btn.textContent = 'Sign In with User ID';
+              return;
+            }
           }
-        } catch (e) {}
+
+          // Single row fast lookup
+          if (!existingReq) {
+            const { data: cloudReq } = await withTimeout(
+              state.supabase
+                .from('access_requests')
+                .select('*')
+                .ilike('user_id_alias', rawUserId)
+                .maybeSingle(),
+              2500
+            );
+
+            if (cloudReq) {
+              existingReq = {
+                id: cloudReq.id,
+                userId: cloudReq.user_id_alias,
+                password: cloudReq.password_hash || '',
+                fullName: cloudReq.full_name || cloudReq.user_id_alias,
+                phone: cloudReq.phone || '',
+                role: cloudReq.role || 'user',
+                status: cloudReq.status || 'pending'
+              };
+            }
+          }
+        } catch (cloudErr) {
+          console.warn("Cloud auth check notice:", cloudErr);
+        }
       }
 
       if (existingReq) {
@@ -29091,71 +29225,28 @@
           btn.disabled = false;
           btn.textContent = 'Sign In with User ID';
           return;
-        }
-      }
-
-      // 2. Direct Supabase Email Auth Check (if user entered email like goridhruv1@gmail.com)
-      if (rawUserId.includes('@') && state.isCloud && state.supabase) {
-        try {
-          const { data: authData, error: authErr } = await state.supabase.auth.signInWithPassword({
-            email: rawUserId,
-            password: pass
-          });
-          if (!authErr && authData && authData.user) {
-            state.user = authData.user;
-            await fetchUserProfile(authData.user);
-            savePortalSession({
-              loggedIn: true,
-              mode: 'cloud',
-              userId: authData.user.id,
-              email: authData.user.email,
-              role: state.profile?.role || 'admin',
-              fullName: state.profile?.full_name || authData.user.email
-            });
-            closeAuthModal();
-            updateUserInterface();
-            await loadData();
-            showToast(`Welcome back, ${state.profile?.full_name || authData.user.email}!`);
+        } else if (existingReq.status === 'approved') {
+          if (existingReq.password === pass) {
+            user = {
+              userId: existingReq.userId,
+              password: existingReq.password,
+              fullName: existingReq.fullName,
+              phone: existingReq.phone,
+              role: existingReq.role || 'user'
+            };
+            localUsers.push(user);
+            saveRegisteredUsers(localUsers);
+          } else {
+            errEl.textContent = 'Incorrect password. Please try again.';
             btn.disabled = false;
             btn.textContent = 'Sign In with User ID';
             return;
           }
-        } catch (cloudAuthErr) {
-          console.warn("Supabase direct auth attempt:", cloudAuthErr);
         }
-      }
-
-      // 3. Check User Registry (matches either userId or email)
-      const users = getRegisteredUsers();
-      let user = users.find(u => u.userId.toLowerCase() === userId || (u.email && u.email.toLowerCase() === userId));
-
-      // If approved in cloud request but not in local registry, auto-populate user
-      if (!user && existingReq && existingReq.status === 'approved') {
-        user = {
-          userId: existingReq.userId,
-          password: existingReq.password,
-          fullName: existingReq.fullName,
-          phone: existingReq.phone,
-          role: existingReq.role || 'user'
-        };
-        users.push(user);
-        saveRegisteredUsers(users);
-      }
-
-      // Root administrator email alias mapping
-      if (!user && (userId === 'goridhruv1@gmail.com' || userId === 'admin@cblr.portal' || userId === 'admin')) {
-        user = users.find(u => u.userId.toLowerCase() === 'admin');
       }
 
       if (!user) {
         errEl.textContent = `User ID "${rawUserId}" not found. Please click "Request Access" to apply for an account.`;
-        btn.disabled = false;
-        btn.textContent = 'Sign In with User ID';
-        return;
-      }
-
-      if (user.password !== pass) {
-        errEl.textContent = 'Incorrect password. Please try again.';
         btn.disabled = false;
         btn.textContent = 'Sign In with User ID';
         return;
@@ -30561,6 +30652,134 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
   }
 
 
-  </script>
+  
+  // ==========================================================================
+  // Direct Examinee Provisioning Controller (Admin Only)
+  // ==========================================================================
+  const openDirectAddBtn = document.getElementById('openDirectAddUserModalBtn');
+  const closeDirectAddBtn = document.getElementById('closeDirectAddUserModalBtn');
+  const cancelDirectAddBtn = document.getElementById('cancelDirectAddUserBtn');
+  const submitDirectAddBtn = document.getElementById('submitDirectAddUserBtn');
+
+  openDirectAddBtn?.addEventListener('click', () => {
+    document.getElementById('directUserId').value = '';
+    document.getElementById('directFullName').value = '';
+    document.getElementById('directPhone').value = '';
+    document.getElementById('directPassword').value = 'password123';
+    document.getElementById('directUserRole').value = 'user';
+    const fb = document.getElementById('directAddUserFeedback');
+    if (fb) fb.textContent = '';
+    openModal('directAddUserModal');
+  });
+
+  closeDirectAddBtn?.addEventListener('click', () => closeModal('directAddUserModal'));
+  cancelDirectAddBtn?.addEventListener('click', () => closeModal('directAddUserModal'));
+
+  submitDirectAddBtn?.addEventListener('click', async () => {
+    const rawUserId = document.getElementById('directUserId')?.value.trim();
+    const fullName = document.getElementById('directFullName')?.value.trim();
+    const phone = document.getElementById('directPhone')?.value.trim();
+    const pass = document.getElementById('directPassword')?.value;
+    const role = document.getElementById('directUserRole')?.value || 'user';
+    const fb = document.getElementById('directAddUserFeedback');
+
+    if (!fb) return;
+    fb.style.color = 'var(--bad)';
+    fb.textContent = '';
+
+    if (!rawUserId) {
+      fb.textContent = 'User ID is required.';
+      return;
+    }
+    if (rawUserId.length < 3) {
+      fb.textContent = 'User ID must be at least 3 characters.';
+      return;
+    }
+    if (!/^[a-zA-Z0-9_.-]+$/.test(rawUserId)) {
+      fb.textContent = 'User ID can only contain letters, numbers, hyphens, and underscores.';
+      return;
+    }
+    if (!fullName) {
+      fb.textContent = 'Full name is required.';
+      return;
+    }
+    if (!pass || pass.length < 6) {
+      fb.textContent = 'Password must be at least 6 characters.';
+      return;
+    }
+
+    const uKey = rawUserId.toLowerCase();
+    const users = getRegisteredUsers();
+    if (users.some(u => (u.userId || '').toLowerCase() === uKey)) {
+      fb.textContent = `User ID "${rawUserId}" already exists in the registry.`;
+      return;
+    }
+
+    submitDirectAddBtn.disabled = true;
+    submitDirectAddBtn.textContent = 'Adding user...';
+
+    const newUser = {
+      userId: rawUserId,
+      password: pass,
+      fullName: fullName,
+      phone: phone || '',
+      role: role,
+      status: 'approved',
+      createdAt: new Date().toISOString()
+    };
+
+    // 1. Save locally
+    users.push(newUser);
+    saveRegisteredUsers(users);
+
+    // 2. Add to approved access requests so it is fully tracked
+    const reqs = getAccessRequests();
+    const existingReqIdx = reqs.findIndex(r => (r.userId || '').toLowerCase() === uKey);
+    const approvedReq = {
+      id: 'req-' + Date.now(),
+      userId: rawUserId,
+      password: pass,
+      fullName: fullName,
+      phone: phone || '',
+      role: role,
+      status: 'approved',
+      submittedAt: new Date().toISOString(),
+      reviewedAt: new Date().toISOString()
+    };
+    if (existingReqIdx !== -1) {
+      reqs[existingReqIdx] = approvedReq;
+    } else {
+      reqs.unshift(approvedReq);
+    }
+    saveAccessRequests(reqs);
+
+    // 3. Fast sync to Supabase if connected
+    if (state.isCloud && state.supabase) {
+      try {
+        await withTimeout(
+          state.supabase.from('access_requests').upsert([{
+            user_id_alias: rawUserId,
+            full_name: fullName,
+            phone: phone || '',
+            password_hash: pass,
+            status: 'approved',
+            role: role,
+            reviewed_at: new Date().toISOString()
+          }], { onConflict: 'user_id_alias' }),
+          3000
+        );
+      } catch (err) {
+        console.warn('Could not sync directly added user to Supabase:', err);
+      }
+    }
+
+    submitDirectAddBtn.disabled = false;
+    submitDirectAddBtn.textContent = 'Create Account';
+    closeModal('directAddUserModal');
+    renderAdminDashboard();
+    showToast(`Examinee "${rawUserId}" created and approved! They can now log in.`);
+  });
+
+</script>
 </body>
 </html>
