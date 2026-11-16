@@ -25221,7 +25221,25 @@
   function getRegisteredUsers() {
     try {
       const raw = localStorage.getItem(USER_REGISTRY_KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          // Ensure default approved accounts exist
+          if (!parsed.some(u => (u.userId || '').toLowerCase() === 'prem')) {
+            parsed.push({
+              userId: 'prem',
+              password: 'password123',
+              fullName: 'Prem',
+              phone: '+91 98000 00000',
+              role: 'user',
+              status: 'approved',
+              createdAt: '2026-11-16T00:00:00.000Z'
+            });
+            localStorage.setItem(USER_REGISTRY_KEY, JSON.stringify(parsed));
+          }
+          return parsed;
+        }
+      }
     } catch (e) {}
     const defaultRegistry = [
       {
@@ -25232,6 +25250,15 @@
         role: 'admin',
         status: 'approved',
         createdAt: '2026-01-01T00:00:00.000Z'
+      },
+      {
+        userId: 'prem',
+        password: 'password123',
+        fullName: 'Prem',
+        phone: '+91 98000 00000',
+        role: 'user',
+        status: 'approved',
+        createdAt: '2026-11-16T00:00:00.000Z'
       },
       {
         userId: 'candidate_demo',
