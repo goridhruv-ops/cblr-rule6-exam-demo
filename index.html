@@ -2131,8 +2131,8 @@
 
       <!-- Gate Sign In Form (User ID + Password) -->
       <div id="gateSignInForm">
-        <label>User ID</label>
-        <input type="text" id="gateLoginUserId" placeholder="e.g. rajesh_cblr or admin" autocomplete="username">
+        <label>User ID or Email</label>
+        <input type="text" id="gateLoginUserId" placeholder="e.g. goridhruv1@gmail.com, admin, or user id" autocomplete="username">
         <label>Password</label>
         <input type="password" id="gateLoginPass" placeholder="••••••••" autocomplete="current-password">
         <div id="gateAuthError" class="note" style="color:var(--bad);margin-top:10px;font-weight:600;min-height:18px;"></div>
@@ -25224,6 +25224,12 @@
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
+          // Ensure default admin has email attached
+          const adminAcc = parsed.find(u => (u.userId || '').toLowerCase() === 'admin');
+          if (adminAcc && !adminAcc.email) {
+            adminAcc.email = 'goridhruv1@gmail.com';
+            localStorage.setItem(USER_REGISTRY_KEY, JSON.stringify(parsed));
+          }
           // Ensure default approved accounts exist
           if (!parsed.some(u => (u.userId || '').toLowerCase() === 'prem')) {
             parsed.push({
@@ -25244,6 +25250,7 @@
     const defaultRegistry = [
       {
         userId: 'admin',
+        email: 'goridhruv1@gmail.com',
         password: 'admin123',
         fullName: 'System Administrator (Dhruv Gori)',
         phone: '+91 98765 00000',
@@ -29087,9 +29094,40 @@
         }
       }
 
-      // 2. Check User Registry
+      // 2. Direct Supabase Email Auth Check (if user entered email like goridhruv1@gmail.com)
+      if (rawUserId.includes('@') && state.isCloud && state.supabase) {
+        try {
+          const { data: authData, error: authErr } = await state.supabase.auth.signInWithPassword({
+            email: rawUserId,
+            password: pass
+          });
+          if (!authErr && authData && authData.user) {
+            state.user = authData.user;
+            await fetchUserProfile(authData.user);
+            savePortalSession({
+              loggedIn: true,
+              mode: 'cloud',
+              userId: authData.user.id,
+              email: authData.user.email,
+              role: state.profile?.role || 'admin',
+              fullName: state.profile?.full_name || authData.user.email
+            });
+            closeAuthModal();
+            updateUserInterface();
+            await loadData();
+            showToast(`Welcome back, ${state.profile?.full_name || authData.user.email}!`);
+            btn.disabled = false;
+            btn.textContent = 'Sign In with User ID';
+            return;
+          }
+        } catch (cloudAuthErr) {
+          console.warn("Supabase direct auth attempt:", cloudAuthErr);
+        }
+      }
+
+      // 3. Check User Registry (matches either userId or email)
       const users = getRegisteredUsers();
-      let user = users.find(u => u.userId.toLowerCase() === userId);
+      let user = users.find(u => u.userId.toLowerCase() === userId || (u.email && u.email.toLowerCase() === userId));
 
       // If approved in cloud request but not in local registry, auto-populate user
       if (!user && existingReq && existingReq.status === 'approved') {
@@ -29102,6 +29140,11 @@
         };
         users.push(user);
         saveRegisteredUsers(users);
+      }
+
+      // Root administrator email alias mapping
+      if (!user && (userId === 'goridhruv1@gmail.com' || userId === 'admin@cblr.portal' || userId === 'admin')) {
+        user = users.find(u => u.userId.toLowerCase() === 'admin');
       }
 
       if (!user) {
