@@ -25698,6 +25698,9 @@
       if (statusBadge) statusBadge.className = "status-pill online";
       if (statusText) statusText.textContent = "☁️ Supabase Cloud Active";
 
+      // Sync cloud access requests immediately upon connection
+      await syncAccessRequestsFromCloud();
+
       // Listen for auth changes
       state.supabase.auth.onAuthStateChange(async (event, session) => {
         if (session && session.user) {
@@ -25811,7 +25814,7 @@
   // 4. Data Layer: Questions & Exam History
   // ==========================================================================
   async function loadData() {
-    await Promise.all([loadBank(), loadHistory(), loadMaterials()]);
+    await Promise.all([loadBank(), loadHistory(), loadMaterials(), syncAccessRequestsFromCloud()]);
     refreshHierarchyDropdowns();
     renderBankList();
     renderHistory();
@@ -28446,10 +28449,72 @@
   document.getElementById('exportHistoryBtn')?.addEventListener('click', exportHistoryFile);
 
   // ==========================================================================
-  // 13. Admin Dashboard & Central Controls
+
+  // Sync pending and approved access requests from Supabase
+  async function syncAccessRequestsFromCloud() {
+    if (!state.isCloud || !state.supabase) return;
+    try {
+      const { data, error } = await state.supabase
+        .from('access_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && Array.isArray(data)) {
+        const localReqs = getAccessRequests();
+        const localMap = new Map();
+        localReqs.forEach(r => localMap.set((r.userId || '').toLowerCase(), r));
+
+        const localUsers = getRegisteredUsers();
+        const userMap = new Map();
+        localUsers.forEach(u => userMap.set((u.userId || '').toLowerCase(), u));
+
+        data.forEach(cloudReq => {
+          const uId = (cloudReq.user_id_alias || '').trim();
+          if (!uId) return;
+          const uKey = uId.toLowerCase();
+
+          // Upsert into requests
+          localMap.set(uKey, {
+            id: cloudReq.id || ('req-' + uKey),
+            userId: uId,
+            password: cloudReq.password_hash || '',
+            fullName: cloudReq.full_name || uId,
+            phone: cloudReq.phone || '',
+            role: cloudReq.role || 'user',
+            status: cloudReq.status || 'pending',
+            submittedAt: cloudReq.created_at || new Date().toISOString(),
+            reviewedAt: cloudReq.reviewed_at || null
+          });
+
+          // If approved in cloud, ensure examinee is in registered users
+          if (cloudReq.status === 'approved' && !userMap.has(uKey)) {
+            userMap.set(uKey, {
+              userId: uId,
+              password: cloudReq.password_hash || '',
+              fullName: cloudReq.full_name || uId,
+              phone: cloudReq.phone || '',
+              role: cloudReq.role || 'user',
+              status: 'approved',
+              createdAt: cloudReq.created_at || new Date().toISOString()
+            });
+          }
+        });
+
+        saveAccessRequests(Array.from(localMap.values()));
+        saveRegisteredUsers(Array.from(userMap.values()));
+      }
+    } catch (err) {
+      console.warn('Could not sync access requests from cloud:', err);
+    }
+  }
+
+    // 13. Admin Dashboard & Central Controls
   // ==========================================================================
   async function renderAdminDashboard() {
     if (!isAdmin()) return;
+
+    // Synchronize latest requests from Supabase cloud first
+    await syncAccessRequestsFromCloud();
 
     document.getElementById('adminQuestionsCount').textContent = state.bank.length;
 
@@ -28561,7 +28626,7 @@
   }
 
   // Admin Approval Action Handler
-  function handleApproveRequest(reqUserId) {
+  async function handleApproveRequest(reqUserId) {
     const requests = getAccessRequests();
     const req = requests.find(r => r.userId.toLowerCase() === reqUserId.toLowerCase());
     if (!req) return;
@@ -28586,13 +28651,25 @@
         saveRegisteredUsers(users);
       }
 
+      // Sync approval status to Supabase cloud
+      if (state.isCloud && state.supabase) {
+        try {
+          await state.supabase
+            .from('access_requests')
+            .update({ status: 'approved', reviewed_at: new Date().toISOString() })
+            .ilike('user_id_alias', req.userId);
+        } catch (cloudErr) {
+          console.warn("Could not sync approval to cloud:", cloudErr);
+        }
+      }
+
       showToast(`User ID "${req.userId}" approved! Examinee can now sign in.`);
       renderAdminDashboard();
     }
   }
 
   // Admin Rejection Action Handler
-  function handleRejectRequest(reqUserId) {
+  async function handleRejectRequest(reqUserId) {
     const requests = getAccessRequests();
     const req = requests.find(r => r.userId.toLowerCase() === reqUserId.toLowerCase());
     if (!req) return;
@@ -28601,6 +28678,19 @@
       req.status = 'rejected';
       req.reviewedAt = new Date().toISOString();
       saveAccessRequests(requests);
+
+      // Sync rejection status to Supabase cloud
+      if (state.isCloud && state.supabase) {
+        try {
+          await state.supabase
+            .from('access_requests')
+            .update({ status: 'rejected', reviewed_at: new Date().toISOString() })
+            .ilike('user_id_alias', req.userId);
+        } catch (cloudErr) {
+          console.warn("Could not sync rejection to cloud:", cloudErr);
+        }
+      }
+
       showToast(`Access request for "${req.userId}" declined.`);
       renderAdminDashboard();
     }
@@ -28922,9 +29012,40 @@
     btn.textContent = 'Verifying credentials...';
 
     try {
+      // Sync access requests from cloud first if connected
+      if (state.isCloud && state.supabase) {
+        try {
+          await syncAccessRequestsFromCloud();
+        } catch(e) {}
+      }
+
       // 1. Check if User ID is in Pending Access Requests
-      const requests = getAccessRequests();
-      const existingReq = requests.find(r => r.userId.toLowerCase() === userId);
+      let requests = getAccessRequests();
+      let existingReq = requests.find(r => r.userId.toLowerCase() === userId);
+
+      // Fallback query directly to cloud if not in local memory
+      if (!existingReq && state.isCloud && state.supabase) {
+        try {
+          const { data: cloudReq } = await state.supabase
+            .from('access_requests')
+            .select('*')
+            .ilike('user_id_alias', rawUserId)
+            .maybeSingle();
+
+          if (cloudReq) {
+            existingReq = {
+              id: cloudReq.id,
+              userId: cloudReq.user_id_alias,
+              password: cloudReq.password_hash || '',
+              fullName: cloudReq.full_name || cloudReq.user_id_alias,
+              phone: cloudReq.phone || '',
+              role: cloudReq.role || 'user',
+              status: cloudReq.status || 'pending'
+            };
+          }
+        } catch (e) {}
+      }
+
       if (existingReq) {
         if (existingReq.status === 'pending') {
           errEl.textContent = `⏳ Access Request Pending: User ID "${rawUserId}" is awaiting review and approval by the administrator.`;
@@ -28941,7 +29062,20 @@
 
       // 2. Check User Registry
       const users = getRegisteredUsers();
-      const user = users.find(u => u.userId.toLowerCase() === userId);
+      let user = users.find(u => u.userId.toLowerCase() === userId);
+
+      // If approved in cloud request but not in local registry, auto-populate user
+      if (!user && existingReq && existingReq.status === 'approved') {
+        user = {
+          userId: existingReq.userId,
+          password: existingReq.password,
+          fullName: existingReq.fullName,
+          phone: existingReq.phone,
+          role: existingReq.role || 'user'
+        };
+        users.push(user);
+        saveRegisteredUsers(users);
+      }
 
       if (!user) {
         errEl.textContent = `User ID "${rawUserId}" not found. Please click "Request Access" to apply for an account.`;
