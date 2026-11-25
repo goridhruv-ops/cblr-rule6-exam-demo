@@ -1,0 +1,7 @@
+project_id = "cblr-rule6-exam-demo"
+
+[functions.manage-candidate]
+enabled = true
+verify_jwt = false
+# The function validates the bearer token with Auth and checks the approved admin profile.
+entrypoint = "./functions/manage-candidate/index.ts"
