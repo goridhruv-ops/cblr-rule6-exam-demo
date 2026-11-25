@@ -30238,6 +30238,136 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
   updateUserInterface();
   initSupabase().then(() => loadData());
 
+
+  // Direct Examinee Provisioning Controller (Admin Only)
+  // ==========================================================================
+  const openDirectAddBtn = document.getElementById('openDirectAddUserModalBtn');
+  const closeDirectAddBtn = document.getElementById('closeDirectAddUserModalBtn');
+  const cancelDirectAddBtn = document.getElementById('cancelDirectAddUserBtn');
+  const submitDirectAddBtn = document.getElementById('submitDirectAddUserBtn');
+
+  openDirectAddBtn?.addEventListener('click', () => {
+    document.getElementById('directUserId').value = '';
+    document.getElementById('directFullName').value = '';
+    document.getElementById('directPhone').value = '';
+    document.getElementById('directPassword').value = 'password123';
+    document.getElementById('directUserRole').value = 'user';
+    const fb = document.getElementById('directAddUserFeedback');
+    if (fb) fb.textContent = '';
+    openModal('directAddUserModal');
+  });
+
+  closeDirectAddBtn?.addEventListener('click', () => closeModal('directAddUserModal'));
+  cancelDirectAddBtn?.addEventListener('click', () => closeModal('directAddUserModal'));
+
+  submitDirectAddBtn?.addEventListener('click', async () => {
+    const rawUserId = document.getElementById('directUserId')?.value.trim();
+    const fullName = document.getElementById('directFullName')?.value.trim();
+    const phone = document.getElementById('directPhone')?.value.trim();
+    const pass = document.getElementById('directPassword')?.value;
+    const role = document.getElementById('directUserRole')?.value || 'user';
+    const fb = document.getElementById('directAddUserFeedback');
+
+    if (!fb) return;
+    fb.style.color = 'var(--bad)';
+    fb.textContent = '';
+
+    if (!rawUserId) {
+      fb.textContent = 'User ID is required.';
+      return;
+    }
+    if (rawUserId.length < 3) {
+      fb.textContent = 'User ID must be at least 3 characters.';
+      return;
+    }
+    if (!/^[a-zA-Z0-9_.-]+$/.test(rawUserId)) {
+      fb.textContent = 'User ID can only contain letters, numbers, hyphens, and underscores.';
+      return;
+    }
+    if (!fullName) {
+      fb.textContent = 'Full name is required.';
+      return;
+    }
+    if (!pass || pass.length < 6) {
+      fb.textContent = 'Password must be at least 6 characters.';
+      return;
+    }
+
+    const uKey = rawUserId.toLowerCase();
+    const users = getRegisteredUsers();
+    if (users.some(u => (u.userId || '').toLowerCase() === uKey)) {
+      fb.textContent = `User ID "${rawUserId}" already exists in the registry.`;
+      return;
+    }
+
+    submitDirectAddBtn.disabled = true;
+    submitDirectAddBtn.textContent = 'Adding user...';
+
+    const newUser = {
+      userId: rawUserId,
+      password: pass,
+      fullName: fullName,
+      phone: phone || '',
+      role: role,
+      status: 'approved',
+      createdAt: new Date().toISOString()
+    };
+
+    // 1. Save locally
+    users.push(newUser);
+    saveRegisteredUsers(users);
+
+    // 2. Add to approved access requests so it is fully tracked
+    const reqs = getAccessRequests();
+    const existingReqIdx = reqs.findIndex(r => (r.userId || '').toLowerCase() === uKey);
+    const approvedReq = {
+      id: 'req-' + Date.now(),
+      userId: rawUserId,
+      password: pass,
+      fullName: fullName,
+      phone: phone || '',
+      role: role,
+      status: 'approved',
+      submittedAt: new Date().toISOString(),
+      reviewedAt: new Date().toISOString()
+    };
+    if (existingReqIdx !== -1) {
+      reqs[existingReqIdx] = approvedReq;
+    } else {
+      reqs.unshift(approvedReq);
+    }
+    saveAccessRequests(reqs);
+
+    // 3. Fast sync to Supabase if connected
+    if (state.isCloud && state.supabase) {
+      try {
+        await withTimeout(
+          state.supabase.from('access_requests').upsert([{
+            user_id_alias: rawUserId,
+            full_name: fullName,
+            phone: phone || '',
+            password_hash: pass,
+            status: 'approved',
+            role: role,
+            reviewed_at: new Date().toISOString()
+          }], { onConflict: 'user_id_alias' }),
+          3000
+        );
+      } catch (err) {
+        console.warn('Could not sync directly added user to Supabase:', err);
+      }
+    }
+
+    submitDirectAddBtn.disabled = false;
+    submitDirectAddBtn.textContent = 'Create Account';
+    closeModal('directAddUserModal');
+    renderAdminDashboard();
+    showToast(`Examinee "${rawUserId}" created and approved! They can now log in.`);
+  });
+
+
+
+
   // Clean URL if reloaded with cache-buster query parameter
   if (window.location.search.includes('_v=')) {
     try {
@@ -30654,132 +30784,6 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
 
   
   // ==========================================================================
-  // Direct Examinee Provisioning Controller (Admin Only)
-  // ==========================================================================
-  const openDirectAddBtn = document.getElementById('openDirectAddUserModalBtn');
-  const closeDirectAddBtn = document.getElementById('closeDirectAddUserModalBtn');
-  const cancelDirectAddBtn = document.getElementById('cancelDirectAddUserBtn');
-  const submitDirectAddBtn = document.getElementById('submitDirectAddUserBtn');
-
-  openDirectAddBtn?.addEventListener('click', () => {
-    document.getElementById('directUserId').value = '';
-    document.getElementById('directFullName').value = '';
-    document.getElementById('directPhone').value = '';
-    document.getElementById('directPassword').value = 'password123';
-    document.getElementById('directUserRole').value = 'user';
-    const fb = document.getElementById('directAddUserFeedback');
-    if (fb) fb.textContent = '';
-    openModal('directAddUserModal');
-  });
-
-  closeDirectAddBtn?.addEventListener('click', () => closeModal('directAddUserModal'));
-  cancelDirectAddBtn?.addEventListener('click', () => closeModal('directAddUserModal'));
-
-  submitDirectAddBtn?.addEventListener('click', async () => {
-    const rawUserId = document.getElementById('directUserId')?.value.trim();
-    const fullName = document.getElementById('directFullName')?.value.trim();
-    const phone = document.getElementById('directPhone')?.value.trim();
-    const pass = document.getElementById('directPassword')?.value;
-    const role = document.getElementById('directUserRole')?.value || 'user';
-    const fb = document.getElementById('directAddUserFeedback');
-
-    if (!fb) return;
-    fb.style.color = 'var(--bad)';
-    fb.textContent = '';
-
-    if (!rawUserId) {
-      fb.textContent = 'User ID is required.';
-      return;
-    }
-    if (rawUserId.length < 3) {
-      fb.textContent = 'User ID must be at least 3 characters.';
-      return;
-    }
-    if (!/^[a-zA-Z0-9_.-]+$/.test(rawUserId)) {
-      fb.textContent = 'User ID can only contain letters, numbers, hyphens, and underscores.';
-      return;
-    }
-    if (!fullName) {
-      fb.textContent = 'Full name is required.';
-      return;
-    }
-    if (!pass || pass.length < 6) {
-      fb.textContent = 'Password must be at least 6 characters.';
-      return;
-    }
-
-    const uKey = rawUserId.toLowerCase();
-    const users = getRegisteredUsers();
-    if (users.some(u => (u.userId || '').toLowerCase() === uKey)) {
-      fb.textContent = `User ID "${rawUserId}" already exists in the registry.`;
-      return;
-    }
-
-    submitDirectAddBtn.disabled = true;
-    submitDirectAddBtn.textContent = 'Adding user...';
-
-    const newUser = {
-      userId: rawUserId,
-      password: pass,
-      fullName: fullName,
-      phone: phone || '',
-      role: role,
-      status: 'approved',
-      createdAt: new Date().toISOString()
-    };
-
-    // 1. Save locally
-    users.push(newUser);
-    saveRegisteredUsers(users);
-
-    // 2. Add to approved access requests so it is fully tracked
-    const reqs = getAccessRequests();
-    const existingReqIdx = reqs.findIndex(r => (r.userId || '').toLowerCase() === uKey);
-    const approvedReq = {
-      id: 'req-' + Date.now(),
-      userId: rawUserId,
-      password: pass,
-      fullName: fullName,
-      phone: phone || '',
-      role: role,
-      status: 'approved',
-      submittedAt: new Date().toISOString(),
-      reviewedAt: new Date().toISOString()
-    };
-    if (existingReqIdx !== -1) {
-      reqs[existingReqIdx] = approvedReq;
-    } else {
-      reqs.unshift(approvedReq);
-    }
-    saveAccessRequests(reqs);
-
-    // 3. Fast sync to Supabase if connected
-    if (state.isCloud && state.supabase) {
-      try {
-        await withTimeout(
-          state.supabase.from('access_requests').upsert([{
-            user_id_alias: rawUserId,
-            full_name: fullName,
-            phone: phone || '',
-            password_hash: pass,
-            status: 'approved',
-            role: role,
-            reviewed_at: new Date().toISOString()
-          }], { onConflict: 'user_id_alias' }),
-          3000
-        );
-      } catch (err) {
-        console.warn('Could not sync directly added user to Supabase:', err);
-      }
-    }
-
-    submitDirectAddBtn.disabled = false;
-    submitDirectAddBtn.textContent = 'Create Account';
-    closeModal('directAddUserModal');
-    renderAdminDashboard();
-    showToast(`Examinee "${rawUserId}" created and approved! They can now log in.`);
-  });
-
 </script>
 </body>
 </html>
