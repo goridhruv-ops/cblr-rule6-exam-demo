@@ -2132,7 +2132,7 @@
       <!-- Gate Sign In Form (User ID + Password) -->
       <div id="gateSignInForm">
         <label>User ID or Email</label>
-        <input type="text" id="gateLoginUserId" placeholder="e.g. goridhruv1@gmail.com, admin, or user id" autocomplete="username">
+        <input type="text" id="gateLoginUserId" placeholder="Your email or assigned user ID" autocomplete="username">
         <label>Password</label>
         <input type="password" id="gateLoginPass" placeholder="••••••••" autocomplete="current-password">
         <div id="gateAuthError" class="note" style="color:var(--bad);margin-top:10px;font-weight:600;min-height:18px;"></div>
@@ -2146,8 +2146,8 @@
         <div class="alert-banner info" style="font-size:0.8rem;margin-bottom:14px;padding:8px 12px;">
           ℹ️ Your access request will be reviewed by the administrator. Once approved, you can log in immediately.
         </div>
-        <label>Desired User ID</label>
-        <input type="text" id="gateRegisterUserId" placeholder="e.g. adv_rajesh or candidate2026" autocomplete="username">
+        <label for="gateRegisterUserId">Email (your login ID)</label>
+        <input type="email" id="gateRegisterUserId" placeholder="you@example.com" autocomplete="username">
         <label>Full Name</label>
         <input type="text" id="gateRegisterName" placeholder="Adv. Rajesh Sharma">
         <label>Phone Number</label>
@@ -3369,7 +3369,7 @@
       <input type="tel" id="directPhone" placeholder="+91 98765 43210">
 
       <label for="directPassword">Password <span style="color:var(--bad);">*</span></label>
-      <input type="text" id="directPassword" placeholder="Minimum 6 characters" required value="password123">
+      <input type="password" id="directPassword" placeholder="Minimum 6 characters" required>
 
       <label for="directUserRole">Account Role</label>
       <select id="directUserRole">
@@ -25260,94 +25260,26 @@
   const USER_REGISTRY_KEY = 'cblr_user_registry_v1';
   const ACCESS_REQUESTS_KEY = 'cblr_access_requests_v1';
 
-  // Seed default admin and sample approved examinee if empty
-  function getRegisteredUsers() {
+  for (const key of [USER_REGISTRY_KEY, ACCESS_REQUESTS_KEY]) {
     try {
-      const raw = localStorage.getItem(USER_REGISTRY_KEY);
+      const raw = localStorage.getItem(key);
       if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          // Ensure default admin has email attached
-          const adminAcc = parsed.find(u => (u.userId || '').toLowerCase() === 'admin');
-          if (adminAcc && !adminAcc.email) {
-            adminAcc.email = 'goridhruv1@gmail.com';
-            localStorage.setItem(USER_REGISTRY_KEY, JSON.stringify(parsed));
-          }
-          // Ensure default approved accounts exist
-          if (!parsed.some(u => (u.userId || '').toLowerCase() === 'prem')) {
-            parsed.push({
-              userId: 'prem',
-              password: 'password123',
-              fullName: 'Prem',
-              phone: '+91 98000 00000',
-              role: 'user',
-              status: 'approved',
-              createdAt: '2026-11-16T00:00:00.000Z'
-            });
-            localStorage.setItem(USER_REGISTRY_KEY, JSON.stringify(parsed));
-          }
-          return parsed;
+        const rows = JSON.parse(raw);
+        if (Array.isArray(rows) && rows.some(row => Object.hasOwn(row,'password'))) {
+          for (const row of rows) delete row.password;
+          localStorage.setItem(key, JSON.stringify(rows));
         }
       }
-    } catch (e) {}
-    const defaultRegistry = [
-      {
-        userId: 'admin',
-        email: 'goridhruv1@gmail.com',
-        password: 'admin123',
-        fullName: 'System Administrator (Dhruv Gori)',
-        phone: '+91 98765 00000',
-        role: 'admin',
-        status: 'approved',
-        createdAt: '2026-01-01T00:00:00.000Z'
-      },
-      {
-        userId: 'prem',
-        password: 'password123',
-        fullName: 'Prem',
-        phone: '+91 98000 00000',
-        role: 'user',
-        status: 'approved',
-        createdAt: '2026-11-16T00:00:00.000Z'
-      },
-      {
-        userId: 'candidate_demo',
-        password: 'candidate123',
-        fullName: 'Adv. Suresh Rao',
-        phone: '+91 98111 22334',
-        role: 'user',
-        status: 'approved',
-        createdAt: '2026-01-02T00:00:00.000Z'
-      }
-    ];
-    saveRegisteredUsers(defaultRegistry);
-    return defaultRegistry;
+    } catch { /* Older browsers may block local storage. */ }
   }
-
-  function saveRegisteredUsers(users) {
-    try {
-      localStorage.setItem(USER_REGISTRY_KEY, JSON.stringify(users));
-    } catch (e) {}
-  }
-
-  function getAccessRequests() {
-    try {
-      const raw = localStorage.getItem(ACCESS_REQUESTS_KEY);
-      if (raw) return JSON.parse(raw);
-    } catch (e) {}
-    return [];
-  }
-
-  function saveAccessRequests(reqs) {
-    try {
-      localStorage.setItem(ACCESS_REQUESTS_KEY, JSON.stringify(reqs));
-    } catch (e) {}
-  }
+  let roster = [];
+  function getRegisteredUsers() { return roster.filter(user => user.status === 'approved'); }
+  function getAccessRequests() { return roster; }
 
   function getPortalSession() {
     try {
       const raw = localStorage.getItem(PORTAL_SESSION_KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) { const session = JSON.parse(raw); return session?.mode === 'practice' ? session : null; }
     } catch (e) {
       console.warn("Unable to read stored portal session:", e);
     }
@@ -25450,9 +25382,7 @@
 
   // Examinee Access Authentication Check: Content visible only after login
   function isLoggedIn() {
-    const isCloudUser = Boolean(state.isCloud && state.user);
-    const storedSess = getPortalSession();
-    return Boolean(isCloudUser || (storedSess && storedSess.loggedIn) || (state.demoLoggedIn && state.profile));
+    return Boolean(state.offlineExam || state.user && state.profile?.status === 'approved' || state.demoLoggedIn && state.profile?.id === 'candidate_demo');
   }
 
   // Safe UI Toast Notification
@@ -25767,7 +25697,7 @@
 
       // Quick ping test
       const { error } = await state.supabase.from('questions').select('id').limit(1);
-      if (error && error.message && error.message.includes('FetchError')) {
+      if (error) {
         throw error;
       }
 
@@ -25775,48 +25705,19 @@
       if (statusBadge) statusBadge.className = "status-pill online";
       if (statusText) statusText.textContent = "☁️ Supabase Cloud Active";
 
-      // Sync cloud access requests immediately upon connection
-      await syncAccessRequestsFromCloud();
-
-      // Listen for auth changes
-      state.supabase.auth.onAuthStateChange(async (event, session) => {
-        if (session && session.user) {
-          state.user = session.user;
-          await fetchUserProfile(session.user);
-          savePortalSession({
-            loggedIn: true,
-            mode: 'cloud',
-            userId: session.user.id,
-            email: session.user.email,
-            role: state.profile?.role || 'user',
-            fullName: state.profile?.full_name || session.user.email
-          });
-          updateUserInterface();
-          await loadData();
-        } else if (event === 'SIGNED_OUT') {
-          state.user = null;
-          state.profile = null;
-          state.demoLoggedIn = false;
-          savePortalSession(null);
-          updateUserInterface();
-          showToast("Signed out. Please log in to continue.");
+      const { data, error: sessionError } = await state.supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      await applySession(data.session);
+      state.supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_OUT' || event === 'SIGNED_IN' && session?.user.id !== state.user?.id) {
+          setTimeout(async () => {
+            const {data} = await state.supabase.auth.getSession();
+            await applySession(data.session);
+            updateUserInterface();
+            await loadData();
+          }, 0);
         }
       });
-
-      // Get initial session
-      const { data: { session } } = await state.supabase.auth.getSession();
-      if (session && session.user) {
-        state.user = session.user;
-        await fetchUserProfile(session.user);
-        savePortalSession({
-          loggedIn: true,
-          mode: 'cloud',
-          userId: session.user.id,
-          email: session.user.email,
-          role: state.profile?.role || 'user',
-          fullName: state.profile?.full_name || session.user.email
-        });
-      }
       updateUserInterface();
 
     } catch (err) {
@@ -25829,6 +25730,15 @@
     state.isCloud = false;
     state.supabase = null;
     state.user = null;
+    state.offlineExam = false;
+    const cached = JSON.parse(localStorage.getItem('cblr_offline_candidate') || 'null');
+    if (!navigator.onLine && cached?.id && localStorage.getItem('cblr_exam_draft_' + cached.id)) {
+      state.profile = {id:cached.id,full_name:cached.full_name,role:'user'};
+      state.offlineExam = true;
+      state.demoLoggedIn = false;
+      updateUserInterface();
+      return;
+    }
     const stored = getPortalSession();
     if (stored && stored.loggedIn) {
       state.demoLoggedIn = true;
@@ -25850,37 +25760,27 @@
     updateUserInterface();
   }
 
-  async function fetchUserProfile(user) {
-    if (!state.supabase || !user) return;
-    try {
-      const { data, error } = await state.supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (data && !error) {
-        state.profile = data;
-      } else {
-        // Fallback profile if row not created yet
-        state.profile = {
-          id: user.id,
-          email: user.email,
-          role: 'user',
-          full_name: user.email.split('@')[0]
-        };
-      }
-    } catch (e) {
-      console.error("Error fetching profile:", e);
+  async function applySession(session) {
+    const user = session?.user;
+    state.offlineExam = false;
+    if (!user) {
+      state.user = null;
+      if (!state.demoLoggedIn) state.profile = null;
+      return;
+    }
+    const {data, error} = await state.supabase.from('profiles').select('id,email,full_name,role,status').eq('id',user.id).single();
+    state.demoLoggedIn = false;
+    state.user = user;
+    state.profile = error ? null : data;
+    if (state.profile?.status === 'approved') {
+      localStorage.setItem('cblr_offline_candidate', JSON.stringify({id:user.id,full_name:data.full_name}));
+    } else {
+      localStorage.removeItem('cblr_offline_candidate');
     }
   }
 
-  // Determine active effective role
   function getEffectiveRole() {
-    if (state.isCloud) {
-      return state.profile && state.profile.role === 'admin' ? 'admin' : 'user';
-    }
-    return state.demoRole;
+    return state.user && state.profile?.status === 'approved' ? state.profile.role : 'user';
   }
 
   function isAdmin() {
@@ -26010,120 +25910,62 @@
     return true;
   }
 
+  function accountHistory(id) {
+    try { return JSON.parse(localStorage.getItem('cblr_history_' + id) || '[]'); }
+    catch { return []; }
+  }
+
+  function storeHistory(id, entries) {
+    localStorage.setItem('cblr_history_' + id, JSON.stringify(entries));
+  }
+
+  function attemptRow(entry, user) {
+    return {id:entry.id, user_id:user.id, user_email:user.email, date:entry.date,
+      mode:entry.mode, neg_mode:entry.negMode, total_q:entry.totalQ, correct:entry.correct,
+      wrong:entry.wrong, skipped:entry.skipped, raw_score:entry.rawScore, max_score:entry.maxScore,
+      pass_mark:entry.passMark, passed:entry.passed, filter_used:entry.filterUsed, per_topic:entry.perTopic};
+  }
+
   async function loadHistory() {
-    if (state.isCloud && state.supabase && state.user) {
-      try {
-        const { data, error } = await state.supabase
-          .from('exam_attempts')
-          .select('*')
-          .eq('user_id', state.user.id)
-          .order('date', { ascending: false });
-
-        if (!error && data) {
-          state.history = data.map(h => ({
-            id: h.id,
-            date: h.date,
-            mode: h.mode,
-            negMode: h.neg_mode,
-            totalQ: h.total_q,
-            correct: h.correct,
-            wrong: h.wrong,
-            skipped: h.skipped,
-            rawScore: Number(h.raw_score),
-            maxScore: Number(h.max_score),
-            passMark: Number(h.pass_mark),
-            passed: h.passed,
-            filterUsed: h.filter_used,
-            perTopic: h.per_topic || {}
-          }));
-          return;
-        }
-      } catch (err) {
-        console.warn("Could not fetch user history from Supabase:", err);
-      }
+    const id = state.profile?.id;
+    state.history = id ? accountHistory(id) : [];
+    if (!state.user || !isLoggedIn() || !id) return;
+    const pending = state.history.filter(entry => entry.pendingSync);
+    if (pending.length) {
+      const {error} = await state.supabase.from('exam_attempts').upsert(
+        pending.map(entry => attemptRow(entry,state.user)), {onConflict:'id',ignoreDuplicates:true});
+      if (error) { showToast('Scorecard saved on this device. Cloud sync is pending.'); return; }
     }
-
-    // Local storage history
-    try {
-      const raw = localStorage.getItem(LOCAL_HISTORY_KEY);
-      state.history = raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      state.history = [];
-    }
+    const {data,error} = await state.supabase.from('exam_attempts').select('*').eq('user_id',id).order('date',{ascending:false});
+    if (error || state.profile?.id !== id) return;
+    const local = accountHistory(id);
+    const dates = new Set(data.map(row => Date.parse(row.date)));
+    const merged = data.map(row => ({...local.find(entry => entry.id === row.id),id:row.id,date:row.date,
+      mode:row.mode,negMode:row.neg_mode,totalQ:row.total_q,correct:row.correct,wrong:row.wrong,skipped:row.skipped,
+      rawScore:Number(row.raw_score),maxScore:Number(row.max_score),passMark:Number(row.pass_mark),
+      passed:row.passed,filterUsed:row.filter_used,perTopic:row.per_topic || {},pendingSync:false}));
+    const ids = new Set(merged.map(entry => entry.id));
+    state.history = [...local.filter(entry => !ids.has(entry.id) && (entry.id || !dates.has(Date.parse(entry.date)))),...merged]
+      .sort((a,b) => Date.parse(b.date) - Date.parse(a.date));
+    storeHistory(id,state.history);
   }
 
   async function saveAttempt(entry) {
-    state.history.unshift(entry);
-    try {
-      localStorage.setItem(LOCAL_HISTORY_KEY, JSON.stringify(state.history));
-      if (state.profile && state.profile.id) {
-        localStorage.setItem('cblr_history_' + state.profile.id, JSON.stringify(state.history));
-      }
-    } catch (e) {}
-
-    if (state.isCloud && state.supabase && state.user) {
-      try {
-        await state.supabase.from('exam_attempts').insert([{
-          user_id: state.user.id,
-          user_email: state.user.email,
-          date: entry.date,
-          mode: entry.mode,
-          neg_mode: entry.negMode,
-          total_q: entry.totalQ,
-          correct: entry.correct,
-          wrong: entry.wrong,
-          skipped: entry.skipped,
-          raw_score: entry.rawScore,
-          max_score: entry.maxScore,
-          pass_mark: entry.passMark,
-          passed: entry.passed,
-          filter_used: entry.filterUsed,
-          per_topic: entry.perTopic
-        }]);
-      } catch (err) {
-        console.error("Cloud attempt save error:", err);
-      }
+    const id = state.profile.id;
+    entry.pendingSync = id !== 'candidate_demo';
+    state.history = [entry,...accountHistory(id).filter(old => old.id !== entry.id)];
+    storeHistory(id,state.history);
+    if (state.user && entry.pendingSync) {
+      try { await loadHistory(); } catch { showToast('Saved on this device. Cloud sync is pending.'); }
     }
   }
 
-  // Auto-sync offline/local attempts to Supabase when user connects to cloud
-  async function syncLocalHistoryToCloud() {
-    if (!state.isCloud || !state.supabase || !state.user || !state.history.length) return;
-    try {
-      const { data: cloudData, error } = await state.supabase
-        .from('exam_attempts')
-        .select('date')
-        .eq('user_id', state.user.id);
-      if (error) return;
-      const cloudDates = new Set((cloudData || []).map(r => r.date));
-      const unsynced = state.history.filter(h => !cloudDates.has(h.date));
-      if (unsynced.length > 0) {
-        const rows = unsynced.map(entry => ({
-          user_id: state.user.id,
-          user_email: state.user.email,
-          date: entry.date,
-          mode: entry.mode,
-          neg_mode: entry.negMode,
-          total_q: entry.totalQ,
-          correct: entry.correct,
-          wrong: entry.wrong,
-          skipped: entry.skipped,
-          raw_score: entry.rawScore,
-          max_score: entry.maxScore,
-          pass_mark: entry.passMark,
-          passed: entry.passed,
-          filter_used: entry.filterUsed,
-          per_topic: entry.perTopic
-        }));
-        await state.supabase.from('exam_attempts').insert(rows);
-        showToast(`Synced ${rows.length} test records to your cloud profile ☁️`);
-      }
-    } catch(err) {
-      console.warn("Cloud history sync error:", err);
-    }
-  }
+  window.addEventListener('online', async () => {
+    if (!state.isCloud && !state.activeExam) { location.reload(); return; }
+    await loadHistory();
+    renderHistory();
+  });
 
-  // ==========================================================================
   // 5. User Interface & Permissions Controller
   // ==========================================================================
   function updateUserInterface() {
@@ -26194,20 +26036,7 @@
       }
     }
 
-    // Demo Bar visibility (only shown when authenticated in local sandbox)
-    if (!state.isCloud && state.demoLoggedIn) {
-      demoRoleBar.style.display = 'flex';
-      const toggleBtn = document.getElementById('toggleDemoAdminBtn');
-      if (state.demoRole === 'admin') {
-        toggleBtn.textContent = "Switch to: 👤 Candidate Mode";
-        toggleBtn.className = "btn sm brass";
-      } else {
-        toggleBtn.textContent = "Switch to: 👑 Admin Preview";
-        toggleBtn.className = "btn sm outline";
-      }
-    } else {
-      demoRoleBar.style.display = 'none';
-    }
+    demoRoleBar.style.display = 'none';
 
     // Header Account Area: Displays active examinee badge, User ID, and Logout button
     const isCloudUser = Boolean(state.isCloud && state.user);
@@ -26250,14 +26079,14 @@
     try {
       // 1. Clear caches if CacheStorage API exists
       if ('caches' in window) {
-        const cacheNames = await caches.keys();
+        const cacheNames = (await caches.keys()).filter(name => name.startsWith('cblr-rule6-shell-'));
         await Promise.all(cacheNames.map(name => caches.delete(name)));
       }
       // 2. Unregister any service workers
       if ('serviceWorker' in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
         for (let registration of registrations) {
-          await registration.unregister();
+          if (registration.scope === new URL('./', location.href).href) await registration.unregister();
         }
       }
     } catch (e) {
@@ -26466,26 +26295,6 @@
   });
   document.getElementById('bankChapterFilter').addEventListener('change', () => renderBankList(true));
 
-  // Demo Role Toggle Button
-  document.getElementById('toggleDemoAdminBtn')?.addEventListener('click', () => {
-    state.demoRole = state.demoRole === 'admin' ? 'user' : 'admin';
-    if (state.profile) {
-      state.profile.role = state.demoRole;
-    }
-    const sess = getPortalSession();
-    if (sess) {
-      sess.role = state.demoRole;
-      savePortalSession(sess);
-    }
-    updateUserInterface();
-    renderBankList();
-    if (state.demoRole === 'admin') {
-      showToast("Switched to Admin Preview Mode.");
-    } else {
-      showToast("Switched to Candidate Mode.");
-    }
-  });
-
   // ==========================================================================
   // 8. Exam Engine Execution
   // ==========================================================================
@@ -26588,18 +26397,39 @@
       strikeCount: 0
     };
 
-    const candidateName = state.profile ? (state.profile.full_name || state.profile.email) : 'Adv. Candidate';
-    const candTag = document.getElementById('examCandidateTag');
-    if (candTag) candTag.textContent = `👨‍💼 Roll No: CBLR-2026 · ${candidateName}`;
-
-    document.getElementById('examLabel').textContent = customTitle
+    state.activeExam.title = customTitle
       ? customTitle
       : (mode === 'full'
           ? `Full Mock Examination — ${examQuestions.length} Questions`
           : (mode === 'book_mastery'
-              ? `📖 Book Mastery Exam: ${book === 'all' ? 'All Sources' : book} — ${examQuestions.length} Questions`
+              ? `📖 Book Mastery Exam: ${state.activeExam.filterUsed.book === 'all' ? 'All Sources' : state.activeExam.filterUsed.book} — ${examQuestions.length} Questions`
               : `Custom Practice Drill — ${examQuestions.length} Questions`));
 
+    state.activeExam.attemptId = crypto.randomUUID();
+    state.activeExam.deadline = Date.now() + durationSec * 1000;
+    openExam();
+  }
+
+  function draftKey() {
+    return state.profile?.id ? 'cblr_exam_draft_' + state.profile.id : null;
+  }
+
+  function saveDraft() {
+    const key = draftKey();
+    if (!key || !state.activeExam) return;
+    try {
+      localStorage.setItem(key, JSON.stringify(state.activeExam));
+    } catch {
+      showToast('This browser could not save your exam progress.');
+    }
+  }
+
+  function openExam() {
+    const candidateName = state.profile ? (state.profile.full_name || state.profile.email) : 'Adv. Candidate';
+    const candTag = document.getElementById('examCandidateTag');
+    if (candTag) candTag.textContent = `👨‍💼 Roll No: CBLR-2026 · ${candidateName}`;
+
+    document.getElementById('examLabel').textContent = state.activeExam.title;
     // Screen transition
     document.getElementById('setupTab').style.display = 'none';
     document.getElementById('bankTab').style.display = 'none';
@@ -26635,7 +26465,7 @@
     clearInterval(state.timerInterval);
     state.timerInterval = setInterval(() => {
       if (!state.activeExam) return;
-      state.activeExam.remaining--;
+      state.activeExam.remaining = Math.max(0, Math.ceil((state.activeExam.deadline - Date.now()) / 1000));
       updateTimerDisplay();
 
       // Per-question live stopwatch
@@ -26680,6 +26510,7 @@
   }
 
   function updateNavGrid() {
+    saveDraft();
     const grid = document.getElementById('navGrid');
     if (!grid) return;
     const buttons = grid.children;
@@ -27168,7 +26999,8 @@
   document.getElementById('examAbandonBtn').addEventListener('click', () => {
     if (confirm("Are you sure you want to abandon this examination? Answers and stopwatch data will not be saved.")) {
       clearInterval(state.timerInterval);
-      state.activeExam = null;
+      localStorage.removeItem(draftKey());
+    state.activeExam = null;
       document.getElementById('examScreen').style.display = 'none';
       document.querySelector('nav.tabs').style.display = 'flex';
       document.querySelector('nav.tabs button[data-tab="setup"]').click();
@@ -27186,6 +27018,8 @@
   });
 
   async function submitTest() {
+    if (!state.activeExam || state.activeExam.submitting) return;
+    state.activeExam.submitting = true;
     clearInterval(state.timerInterval);
     recordCurrentQuestionTime();
     const ex = state.activeExam;
@@ -27261,6 +27095,7 @@
     }
 
     const historyEntry = {
+      id: ex.attemptId || crypto.randomUUID(),
       date: new Date().toISOString(),
       mode: ex.mode,
       negMode: ex.negMode,
@@ -27281,7 +27116,12 @@
       timeSinkCount
     };
 
-    await saveAttempt(historyEntry);
+    try { await saveAttempt(historyEntry); }
+    catch {
+      ex.submitting = false;
+      showToast('Scorecard could not be saved. Free browser storage and submit again.');
+      return;
+    }
 
     const diagnostics = {
       optimumCount,
@@ -27294,6 +27134,7 @@
     };
 
     state.lastExamResults = { historyEntry, reviewItems, scoreLabel, diagnostics };
+    localStorage.removeItem(draftKey());
     state.activeExam = null;
 
     renderResults(historyEntry, reviewItems, scoreLabel, diagnostics);
@@ -27645,6 +27486,7 @@
         const chunk = questionsList.slice(i, i + BATCH_SIZE);
         const payload = chunk.map(q => ({
           id: q.id,
+          book: q.book,
           act: q.act,
           chapter: q.chapter,
           section: q.section,
@@ -27935,17 +27777,17 @@
           const chapter = String(row['Chapter'] || '').trim();
           const section = String(row['Section/Regulation'] || row['Section'] || row['Regulation'] || 'General').trim();
           const text = String(row['Question'] || row['text'] || '').trim();
-          const optA = String(row['OptionA'] || row['Option A'] || '').trim();
+          const optA = String(row['OptionA'] ?? row['Option A'] ?? '').trim();
           const optB = String(row['OptionB'] || row['Option B'] || '').trim();
           const optC = String(row['OptionC'] || row['Option C'] || '').trim();
           const optD = String(row['OptionD'] || row['Option D'] || '').trim();
-          const correctRaw = String(row['CorrectOption'] || row['Correct'] || '').trim();
+          const correctRaw = String(row['CorrectOption'] ?? row['Correct Option (A/B/C/D)'] ?? row['Correct Option'] ?? row['Correct'] ?? '').trim();
           const explain = String(row['Explanation'] || row['explain'] || '').trim();
           const rowQuestionId = String(row['QuestionID'] || row['Question Id'] || row['id'] || row['ID'] || '').trim();
-          const rowBook = String(row['Book'] || row['book'] || row['Source'] || row['source'] || row['Publication'] || row['publication'] || '').trim();
+          const rowBook = String(row['Book Source'] || row['Book'] || row['book'] || row['Source'] || row['source'] || row['Publication'] || row['publication'] || '').trim();
           const book = rowBook || 'Licensed to Clear (Prakash Khatri)';
 
-          if (!act || !chapter || !text || !optA || !optB || !optC || !optD || !(correctRaw in optMap)) {
+          if (!act || !chapter || !text || !optA || !optB || !optC || !optD || !Object.hasOwn(optMap, correctRaw)) {
             skippedBad++;
             continue;
           }
@@ -27998,6 +27840,11 @@
           return;
         }
 
+        const preview = toAdd.slice(0, 3).map(q => '• ' + q.text.slice(0, 100)).join('\n');
+        if (!confirm(`Import ${toAdd.length} new questions?\n${skippedDup} duplicates and ${skippedBad} invalid rows will be skipped.\n\n${preview}`)) {
+          updateImportStatus('idle', 'Import cancelled before publication.');
+          return;
+        }
         updateImportStatus('uploading', `Uploading ${toAdd.length} new question(s) to repository...`);
         await saveQuestionsBatch(toAdd, (done, total) => {
           const pct = 65 + Math.floor((done / total) * 33);
@@ -28029,6 +27876,13 @@
         importBtn.textContent = 'Import Spreadsheet';
         setTimeout(() => { showProgressBar(false); }, 2000);
       }
+    };
+    reader.onerror = reader.onabort = () => {
+      state.isImportingQuestions = false;
+      importBtn.disabled = fileInput.disabled = false;
+      importBtn.textContent = 'Import Spreadsheet';
+      showProgressBar(false);
+      updateImportStatus('error', 'Could not read the spreadsheet. Select the file and try again.');
     };
     reader.readAsArrayBuffer(file);
   }
@@ -28300,7 +28154,7 @@
       }
 
       state.history = [];
-      localStorage.removeItem(LOCAL_HISTORY_KEY);
+
       if (state.profile && state.profile.id) {
         localStorage.removeItem('cblr_history_' + state.profile.id);
       }
@@ -28535,65 +28389,11 @@
     ]);
   }
 
-  // Sync pending and approved access requests from Supabase (Optimized with 2.5s timeout)
   async function syncAccessRequestsFromCloud() {
-    if (!state.isCloud || !state.supabase) return;
-    try {
-      const { data, error } = await withTimeout(
-        state.supabase
-          .from('access_requests')
-          .select('*')
-          .order('created_at', { ascending: false }),
-        2500
-      );
-
-      if (!error && Array.isArray(data)) {
-        const localReqs = getAccessRequests();
-        const localMap = new Map();
-        localReqs.forEach(r => localMap.set((r.userId || '').toLowerCase(), r));
-
-        const localUsers = getRegisteredUsers();
-        const userMap = new Map();
-        localUsers.forEach(u => userMap.set((u.userId || '').toLowerCase(), u));
-
-        data.forEach(cloudReq => {
-          const uId = (cloudReq.user_id_alias || '').trim();
-          if (!uId) return;
-          const uKey = uId.toLowerCase();
-
-          // Upsert into requests
-          localMap.set(uKey, {
-            id: cloudReq.id || ('req-' + uKey),
-            userId: uId,
-            password: cloudReq.password_hash || '',
-            fullName: cloudReq.full_name || uId,
-            phone: cloudReq.phone || '',
-            role: cloudReq.role || 'user',
-            status: cloudReq.status || 'pending',
-            submittedAt: cloudReq.created_at || new Date().toISOString(),
-            reviewedAt: cloudReq.reviewed_at || null
-          });
-
-          // If approved in cloud, ensure examinee is in registered users
-          if (cloudReq.status === 'approved' && !userMap.has(uKey)) {
-            userMap.set(uKey, {
-              userId: uId,
-              password: cloudReq.password_hash || '',
-              fullName: cloudReq.full_name || uId,
-              phone: cloudReq.phone || '',
-              role: cloudReq.role || 'user',
-              status: 'approved',
-              createdAt: cloudReq.created_at || new Date().toISOString()
-            });
-          }
-        });
-
-        saveAccessRequests(Array.from(localMap.values()));
-        saveRegisteredUsers(Array.from(userMap.values()));
-      }
-    } catch (err) {
-      console.warn('Could not sync access requests from cloud:', err);
-    }
+    if (!isAdmin()) { roster = []; return; }
+    const {data,error} = await state.supabase.from('profiles').select('id,email,full_name,phone,role,status,created_at');
+    if (error) { roster = []; showToast(error.message); return; }
+    roster = data.map(p => ({id:p.id,userId:p.email,fullName:p.full_name,phone:p.phone,role:p.role,status:p.status,submittedAt:p.created_at,createdAt:p.created_at}));
   }
 
     // 13. Admin Dashboard & Central Controls
@@ -28713,114 +28513,21 @@
     }
   }
 
-  // Admin Approval Action Handler
-  async function handleApproveRequest(reqUserId) {
-    const requests = getAccessRequests();
-    const req = requests.find(r => r.userId.toLowerCase() === reqUserId.toLowerCase());
-    if (!req) return;
-
-    if (confirm(`Approve User ID "${req.userId}" for examinee ${req.fullName}?`)) {
-      req.status = 'approved';
-      req.reviewedAt = new Date().toISOString();
-      saveAccessRequests(requests);
-
-      // Add to registered users
-      const users = getRegisteredUsers();
-      if (!users.some(u => u.userId.toLowerCase() === req.userId.toLowerCase())) {
-        users.push({
-          userId: req.userId,
-          password: req.password,
-          fullName: req.fullName,
-          phone: req.phone,
-          role: req.role || 'user',
-          status: 'approved',
-          createdAt: new Date().toISOString()
-        });
-        saveRegisteredUsers(users);
-      }
-
-      // Sync approval status to Supabase cloud
-      if (state.isCloud && state.supabase) {
-        try {
-          await state.supabase
-            .from('access_requests')
-            .update({ status: 'approved', reviewed_at: new Date().toISOString() })
-            .ilike('user_id_alias', req.userId);
-        } catch (cloudErr) {
-          console.warn("Could not sync approval to cloud:", cloudErr);
-        }
-      }
-
-      showToast(`User ID "${req.userId}" approved! Examinee can now sign in.`);
-      renderAdminDashboard();
-    }
+  async function reviewAccount(email, status) {
+    const user = roster.find(row => row.userId === email);
+    if (!user || !confirm('Set ' + email + ' to ' + status + '?')) return;
+    const {error} = await state.supabase.rpc('review_candidate', {candidate:user.id, decision:status});
+    if (error) return showToast(error.message);
+    await renderAdminDashboard();
   }
-
-  // Admin Rejection Action Handler
-  async function handleRejectRequest(reqUserId) {
-    const requests = getAccessRequests();
-    const req = requests.find(r => r.userId.toLowerCase() === reqUserId.toLowerCase());
-    if (!req) return;
-
-    if (confirm(`Decline access request for User ID "${req.userId}" (${req.fullName})?`)) {
-      req.status = 'rejected';
-      req.reviewedAt = new Date().toISOString();
-      saveAccessRequests(requests);
-
-      // Sync rejection status to Supabase cloud
-      if (state.isCloud && state.supabase) {
-        try {
-          await state.supabase
-            .from('access_requests')
-            .update({ status: 'rejected', reviewed_at: new Date().toISOString() })
-            .ilike('user_id_alias', req.userId);
-        } catch (cloudErr) {
-          console.warn("Could not sync rejection to cloud:", cloudErr);
-        }
-      }
-
-      showToast(`Access request for "${req.userId}" declined.`);
-      renderAdminDashboard();
-    }
-  }
-
-  // Delete User Handler (Permanently deletes user, access requests, and history from root)
-  async function handleDeleteUser(userId) {
-    if (!userId) return;
-    const currentUserId = state.profile?.userId || '';
-    if (userId.toLowerCase() === 'admin' || userId.toLowerCase() === currentUserId.toLowerCase()) {
-      alert("You cannot delete the root administrator account or your own currently active session.");
-      return;
-    }
-
-    if (confirm(`⚠️ PERMANENT ROOT DELETION\n\nAre you sure you want to permanently delete user "${userId}"?\n\nThis will remove their user credentials, access requests, and mock exam history.`)) {
-      // 1. Remove from local registered users
-      const users = getRegisteredUsers().filter(u => u.userId.toLowerCase() !== userId.toLowerCase());
-      saveRegisteredUsers(users);
-
-      // 2. Remove any associated access requests
-      const reqs = getAccessRequests().filter(r => r.userId.toLowerCase() !== userId.toLowerCase());
-      saveAccessRequests(reqs);
-
-      // 3. Clear user's local history if any
-      try {
-        localStorage.removeItem('cblr_history_' + userId);
-      } catch (e) {}
-
-      // 4. Central database purge if connected
-      if (state.isCloud && state.supabase) {
-        try {
-          await state.supabase.from('access_requests').delete().ilike('user_id_alias', userId);
-          await state.supabase.from('profiles').delete().ilike('id', userId);
-          await state.supabase.from('exam_history').delete().ilike('user_id', userId);
-        } catch (cloudErr) {
-          console.warn("Could not sync user deletion to Supabase cloud:", cloudErr);
-        }
-      }
-
-      showToast(`User "${userId}" has been permanently deleted.`);
-      renderAdminDashboard();
-    }
+  function handleApproveRequest(email) { return reviewAccount(email, 'approved'); }
+  function handleRejectRequest(email) { return reviewAccount(email, 'rejected'); }
+  async function handleDeleteUser(email) {
+    const user = roster.find(row => row.userId === email);
+    if (!user || !confirm('Permanently delete ' + email + ' and their attempts?')) return;
+    const {error} = await state.supabase.functions.invoke('manage-candidate', {body:{action:'delete',id:user.id}});
+    if (error) return showToast(error.message);
+    await renderAdminDashboard();
   }
 
   // Seed to Supabase Button (Batched Upsert with Taxonomy Sanitization)
@@ -28907,144 +28614,21 @@
     signInForm.style.display = 'none';
   });
 
-  document.getElementById('submitSignInBtn').addEventListener('click', async () => {
-    const email = document.getElementById('loginEmail').value.trim();
-    const pass = document.getElementById('loginPass').value;
-    const errEl = document.getElementById('authErrorMsg');
-    errEl.textContent = '';
-
-    if (!email || !pass) {
-      errEl.textContent = 'Please enter both email and password.';
-      return;
-    }
-
-    if (!state.isCloud || !state.supabase) {
-      state.demoLoggedIn = true;
-      state.demoRole = email.toLowerCase().includes('admin') ? 'admin' : 'user';
-      state.profile = {
-        id: 'local-user-' + Date.now(),
-        email: email,
-        role: state.demoRole,
-        full_name: email.split('@')[0]
-      };
-      savePortalSession({
-        loggedIn: true,
-        mode: 'local',
-        email: email,
-        role: state.demoRole,
-        fullName: email.split('@')[0]
-      });
-      updateUserInterface();
-      closeModal('authModal');
-      showToast(`Signed in as ${state.demoRole === 'admin' ? 'Admin' : 'Candidate'}.`);
-      await loadData();
-      return;
-    }
-
-    const btn = document.getElementById('submitSignInBtn');
-    btn.disabled = true;
-    btn.textContent = 'Signing in...';
-
-    const { data, error } = await state.supabase.auth.signInWithPassword({ email, password: pass });
-    btn.disabled = false;
-    btn.textContent = 'Sign In';
-
-    if (error) {
-      errEl.textContent = error.message;
-    } else {
-      state.user = data.user;
-      await fetchUserProfile(data.user);
-      savePortalSession({
-        loggedIn: true,
-        mode: 'cloud',
-        userId: data.user.id,
-        email: data.user.email,
-        role: state.profile?.role || 'user',
-        fullName: state.profile?.full_name || data.user.email
-      });
-      updateUserInterface();
-      closeModal('authModal');
-      showToast(`Welcome, ${data.user.email}!`);
-      await loadData();
-    }
-  });
-
-  document.getElementById('submitSignUpBtn').addEventListener('click', async () => {
-    const name = document.getElementById('registerName').value.trim();
-    const email = document.getElementById('registerEmail').value.trim();
-    const pass = document.getElementById('registerPass').value;
-    const errEl = document.getElementById('registerErrorMsg');
-    errEl.textContent = '';
-
-    if (!email || !pass) {
-      errEl.textContent = 'Email and password are required.';
-      return;
-    }
-    if (pass.length < 6) {
-      errEl.textContent = 'Password must be at least 6 characters.';
-      return;
-    }
-    if (!state.isCloud || !state.supabase) {
-      state.demoLoggedIn = true;
-      state.demoRole = 'user';
-      state.profile = {
-        id: 'local-user-' + Date.now(),
-        email: email,
-        role: 'user',
-        full_name: name || email.split('@')[0]
-      };
-      savePortalSession({
-        loggedIn: true,
-        mode: 'local',
-        email: email,
-        role: 'user',
-        fullName: name || email.split('@')[0]
-      });
-      updateUserInterface();
-      closeModal('authModal');
-      showToast("Account created and signed in successfully.");
-      await loadData();
-      return;
-    }
-
-    const btn = document.getElementById('submitSignUpBtn');
-    btn.disabled = true;
-    btn.textContent = 'Registering...';
-
-    const { data, error } = await state.supabase.auth.signUp({
-      email,
-      password: pass,
-      options: {
-        data: { full_name: name || email.split('@')[0] }
-      }
-    });
-
-    btn.disabled = false;
-    btn.textContent = 'Create Account';
-
-    if (error) {
-      errEl.textContent = error.message;
-    } else {
-      if (data.session && data.user) {
-        state.user = data.user;
-        await fetchUserProfile(data.user);
-        savePortalSession({
-          loggedIn: true,
-          mode: 'cloud',
-          userId: data.user.id,
-          email: data.user.email,
-          role: state.profile?.role || 'user',
-          fullName: state.profile?.full_name || data.user.email
-        });
-      }
-      updateUserInterface();
-      closeModal('authModal');
-      showToast("Account created successfully!");
-      await loadData();
-    }
-  });
+  document.getElementById('submitSignInBtn').onclick = () => {
+    closeModal('authModal');
+    document.getElementById('gateLoginUserId').value = document.getElementById('loginEmail').value;
+    document.getElementById('gateLoginPass').value = document.getElementById('loginPass').value;
+    document.getElementById('gateSubmitSignInBtn').click();
+  };
+  document.getElementById('submitSignUpBtn').onclick = () => {
+    closeModal('authModal');
+    gateTabSignUp.click();
+    document.getElementById('gateRegisterUserId').value = document.getElementById('registerEmail')?.value || '';
+  };
 
   async function handleSignOut() {
+    state.offlineExam = false;
+    localStorage.removeItem('cblr_offline_candidate');
     savePortalSession(null);
     if (state.isCloud && state.supabase) {
       try {
@@ -29094,305 +28678,60 @@
       return;
     }
 
-    const userId = rawUserId.toLowerCase();
     const btn = document.getElementById('gateSubmitSignInBtn');
     btn.disabled = true;
-    btn.textContent = 'Verifying credentials...';
-
     try {
-      // ⚡ INSTANT LOCAL CHECK FIRST (Zero latency, sub-millisecond response!)
-      const localUsers = getRegisteredUsers();
-      let user = localUsers.find(u => 
-        (u.userId && u.userId.toLowerCase() === userId) || 
-        (u.email && u.email.toLowerCase() === userId)
-      );
-
-      // Root administrator alias mapping
-      if (!user && (userId === 'goridhruv1@gmail.com' || userId === 'admin@cblr.portal' || userId === 'admin')) {
-        user = localUsers.find(u => u.userId.toLowerCase() === 'admin');
-      }
-
-      // If found in local registry with matching password, log in immediately without blocking on network!
-      if (user && user.password === pass) {
+      state.offlineExam = false;
+      if (rawUserId.toLowerCase() === 'candidate_demo' && pass === 'candidate123') {
+        if (state.user) await state.supabase.auth.signOut();
+        localStorage.removeItem('cblr_offline_candidate');
+        const demo = {mode:'practice',loggedIn:true,userId:'candidate_demo',fullName:'Practice Candidate',role:'user'};
+        savePortalSession(demo);
         state.demoLoggedIn = true;
-        state.demoRole = user.role || 'user';
-        state.profile = {
-          id: user.userId,
-          userId: user.userId,
-          email: user.email || (user.userId + '@cblr.portal'),
-          phone: user.phone || '',
-          role: user.role,
-          full_name: user.fullName || user.userId
-        };
-
-        savePortalSession({
-          loggedIn: true,
-          mode: 'userid',
-          userId: user.userId,
-          email: user.email || (user.userId + '@cblr.portal'),
-          phone: user.phone || '',
-          role: user.role,
-          fullName: user.fullName || user.userId
-        });
-
-        closeAuthModal();
-        updateUserInterface();
-        // Load data in background
-        loadData().catch(() => {});
-        showToast(`Welcome back, ${user.fullName}! Logged in as ${user.role === 'admin' ? '👑 Admin' : '👤 Examinee'}.`);
-        btn.disabled = false;
-        btn.textContent = 'Sign In with User ID';
-        return;
-      }
-
-      // ⚡ If password was wrong on local account, give instant feedback
-      if (user && user.password !== pass) {
-        errEl.textContent = 'Incorrect password. Please try again.';
-        btn.disabled = false;
-        btn.textContent = 'Sign In with User ID';
-        return;
-      }
-
-      // ⚡ FAST CLOUD CHECK WITH 2.5s TIMEOUT (Only for new examinees not yet synced locally)
-      let requests = getAccessRequests();
-      let existingReq = requests.find(r => r.userId.toLowerCase() === userId);
-
-      if (state.isCloud && state.supabase) {
-        try {
-          // Direct email auth check
-          if (rawUserId.includes('@')) {
-            const { data: authData, error: authErr } = await withTimeout(
-              state.supabase.auth.signInWithPassword({ email: rawUserId, password: pass }),
-              2500
-            );
-            if (!authErr && authData && authData.user) {
-              state.user = authData.user;
-              await fetchUserProfile(authData.user);
-              savePortalSession({
-                loggedIn: true,
-                mode: 'cloud',
-                userId: authData.user.id,
-                email: authData.user.email,
-                role: state.profile?.role || 'admin',
-                fullName: state.profile?.full_name || authData.user.email
-              });
-              closeAuthModal();
-              updateUserInterface();
-              loadData().catch(() => {});
-              showToast(`Welcome back, ${state.profile?.full_name || authData.user.email}!`);
-              btn.disabled = false;
-              btn.textContent = 'Sign In with User ID';
-              return;
-            }
-          }
-
-          // Single row fast lookup
-          if (!existingReq) {
-            const { data: cloudReq } = await withTimeout(
-              state.supabase
-                .from('access_requests')
-                .select('*')
-                .ilike('user_id_alias', rawUserId)
-                .maybeSingle(),
-              2500
-            );
-
-            if (cloudReq) {
-              existingReq = {
-                id: cloudReq.id,
-                userId: cloudReq.user_id_alias,
-                password: cloudReq.password_hash || '',
-                fullName: cloudReq.full_name || cloudReq.user_id_alias,
-                phone: cloudReq.phone || '',
-                role: cloudReq.role || 'user',
-                status: cloudReq.status || 'pending'
-              };
-            }
-          }
-        } catch (cloudErr) {
-          console.warn("Cloud auth check notice:", cloudErr);
+        state.profile = {id:demo.userId,full_name:demo.fullName,role:'user'};
+        state.user = null;
+      } else {
+        if (!state.supabase) throw Error('Connect to the internet to sign in.');
+        const email = rawUserId.includes('@') ? rawUserId : rawUserId.toLowerCase() + '@candidate.cblr.invalid';
+        const {data,error} = await state.supabase.auth.signInWithPassword({email,password:pass});
+        if (error) throw error;
+        savePortalSession(null);
+        await applySession(data.session);
+        if (!isLoggedIn()) {
+          const status = state.profile?.status;
+          await state.supabase.auth.signOut();
+          throw Error(status === 'pending' ? 'Your application is awaiting approval.' : 'Account access is unavailable. Contact the administrator.');
         }
       }
-
-      if (existingReq) {
-        if (existingReq.status === 'pending') {
-          errEl.textContent = `⏳ Access Request Pending: User ID "${rawUserId}" is awaiting review and approval by the administrator.`;
-          btn.disabled = false;
-          btn.textContent = 'Sign In with User ID';
-          return;
-        } else if (existingReq.status === 'rejected') {
-          errEl.textContent = `❌ Access Request Declined: User ID "${rawUserId}" was not approved by the administrator. You may submit a new request.`;
-          btn.disabled = false;
-          btn.textContent = 'Sign In with User ID';
-          return;
-        } else if (existingReq.status === 'approved') {
-          if (existingReq.password === pass) {
-            user = {
-              userId: existingReq.userId,
-              password: existingReq.password,
-              fullName: existingReq.fullName,
-              phone: existingReq.phone,
-              role: existingReq.role || 'user'
-            };
-            localUsers.push(user);
-            saveRegisteredUsers(localUsers);
-          } else {
-            errEl.textContent = 'Incorrect password. Please try again.';
-            btn.disabled = false;
-            btn.textContent = 'Sign In with User ID';
-            return;
-          }
-        }
-      }
-
-      if (!user) {
-        errEl.textContent = `User ID "${rawUserId}" not found. Please click "Request Access" to apply for an account.`;
-        btn.disabled = false;
-        btn.textContent = 'Sign In with User ID';
-        return;
-      }
-
-      // 3. User authenticated successfully
-      state.demoLoggedIn = true;
-      state.demoRole = user.role || 'user';
-      state.profile = {
-        id: user.userId,
-        userId: user.userId,
-        email: user.userId + '@cblr.portal',
-        phone: user.phone || '',
-        role: user.role,
-        full_name: user.fullName || user.userId
-      };
-
-      savePortalSession({
-        loggedIn: true,
-        mode: 'userid',
-        userId: user.userId,
-        email: user.userId + '@cblr.portal',
-        phone: user.phone || '',
-        role: user.role,
-        fullName: user.fullName || user.userId
-      });
-
-      closeAuthModal();
+      document.getElementById('gateLoginPass').value = '';
       updateUserInterface();
       await loadData();
-      showToast(`Welcome back, ${user.fullName}! Logged in as ${user.role === 'admin' ? '👑 Admin' : '👤 Examinee'}.`);
-
-    } catch (e) {
-      console.error(e);
-      errEl.textContent = "Sign in error: " + e.message;
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Sign In with User ID';
-    }
+      resumeDraft();
+    } catch (err) { errEl.textContent = err.message; }
+    finally { btn.disabled = false; }
   });
 
-  document.getElementById('gateSubmitSignUpBtn')?.addEventListener('click', async () => {
-    const rawUserId = document.getElementById('gateRegisterUserId')?.value.trim();
-    const name = document.getElementById('gateRegisterName')?.value.trim();
-    const phone = document.getElementById('gateRegisterPhone')?.value.trim();
-    const pass = document.getElementById('gateRegisterPass')?.value;
-    const errEl = document.getElementById('gateRegisterError');
-    errEl.textContent = '';
-
-    if (!rawUserId) {
-      errEl.textContent = 'Desired User ID is required.';
-      return;
+  document.getElementById('gateSubmitSignUpBtn').onclick = async function () {
+    const el = id => document.getElementById(id);
+    const email = el('gateRegisterUserId').value.trim();
+    const name = el('gateRegisterName').value.trim();
+    const phone = el('gateRegisterPhone').value.trim();
+    const password = el('gateRegisterPass').value;
+    const feedback = el('gateRegisterError');
+    if (!email || !el('gateRegisterUserId').checkValidity() || !name || !phone || password.length < 6) {
+      feedback.textContent = 'Enter your email, name, phone number and a password of at least six characters.'; return;
     }
-    if (rawUserId.length < 3) {
-      errEl.textContent = 'User ID must be at least 3 characters.';
-      return;
-    }
-    if (!/^[a-zA-Z0-9_.-]+$/.test(rawUserId)) {
-      errEl.textContent = 'User ID can only contain letters, numbers, hyphens, and underscores.';
-      return;
-    }
-    if (!name) {
-      errEl.textContent = 'Full name is required.';
-      return;
-    }
-    if (!phone) {
-      errEl.textContent = 'Phone number is required.';
-      return;
-    }
-    if (!pass || pass.length < 6) {
-      errEl.textContent = 'Password must be at least 6 characters.';
-      return;
-    }
+    this.disabled = true;
+    try {
+      if (!state.supabase) throw Error('Connect to the internet to request access.');
+      const {error} = await state.supabase.auth.signUp({email,password,options:{data:{full_name:name,phone}}});
+      if (error) throw error;
+      el('gateRegisterPass').value = '';
+      feedback.textContent = 'Check your email for confirmation instructions. Administrator approval is required.';
+    } catch (err) { feedback.textContent = err.message; }
+    finally { this.disabled = false; }
+  };
 
-    const userId = rawUserId.toLowerCase();
-    const users = getRegisteredUsers();
-    if (users.some(u => u.userId.toLowerCase() === userId)) {
-      errEl.textContent = `User ID "${rawUserId}" is already in use by an approved account. Please choose a different User ID.`;
-      return;
-    }
-
-    const requests = getAccessRequests();
-    const pendingIdx = requests.findIndex(r => r.userId.toLowerCase() === userId && r.status === 'pending');
-    if (pendingIdx !== -1) {
-      errEl.textContent = `An access request for User ID "${rawUserId}" is already pending administrator approval.`;
-      return;
-    }
-
-    const btn = document.getElementById('gateSubmitSignUpBtn');
-    btn.disabled = true;
-    btn.textContent = 'Submitting request...';
-
-    const newRequest = {
-      id: 'req-' + Date.now(),
-      userId: rawUserId,
-      password: pass,
-      fullName: name,
-      phone: phone,
-      role: 'user',
-      status: 'pending',
-      submittedAt: new Date().toISOString()
-    };
-
-    // Save locally
-    requests.unshift(newRequest);
-    saveAccessRequests(requests);
-
-    // Sync to Supabase access_requests table if connected
-    if (state.isCloud && state.supabase) {
-      try {
-        await state.supabase.from('access_requests').insert([{
-          user_id_alias: rawUserId,
-          full_name: name,
-          phone: phone,
-          password_hash: pass,
-          status: 'pending',
-          role: 'user'
-        }]);
-      } catch (err) {
-        console.warn("Could not push access request to Supabase:", err);
-      }
-    }
-
-    btn.disabled = false;
-    btn.textContent = 'Submit Access Request';
-
-    // Clear inputs
-    document.getElementById('gateRegisterUserId').value = '';
-    document.getElementById('gateRegisterName').value = '';
-    document.getElementById('gateRegisterPhone').value = '';
-    document.getElementById('gateRegisterPass').value = '';
-
-    // Switch to sign-in tab with informative notice
-    gateTabSignIn?.click();
-    if (document.getElementById('gateLoginUserId')) {
-      document.getElementById('gateLoginUserId').value = rawUserId;
-    }
-    const authErr = document.getElementById('gateAuthError');
-    if (authErr) {
-      authErr.style.color = 'var(--good)';
-      authErr.textContent = `✅ Access request for "${rawUserId}" submitted! Awaiting administrator approval.`;
-    }
-    showToast(`Access request for "${rawUserId}" submitted successfully!`);
-  });
-
-  // ==========================================================================
   // 15. Cloud Settings Modal & SQL Schema Viewer
   // ==========================================================================
   const cloudModal = document.getElementById('cloudModal');
@@ -29414,7 +28753,7 @@
     if (uIn) uIn.value = '';
     if (nIn) nIn.value = '';
     if (pIn) pIn.value = '';
-    if (passIn) passIn.value = 'password123';
+    if (passIn) passIn.value = '';
     if (rIn) rIn.value = 'user';
     if (fb) fb.textContent = '';
     openModal('directAddUserModal');
@@ -29463,81 +28802,16 @@
     }
 
     const uKey = rawUserId.toLowerCase();
-    const users = getRegisteredUsers();
-    if (users.some(u => (u.userId || '').toLowerCase() === uKey)) {
-      fb.textContent = `User ID "${rawUserId}" already exists in the registry.`;
-      return;
-    }
-
     submitDirectAddBtn.disabled = true;
-    submitDirectAddBtn.textContent = 'Adding user...';
-
-    const newUser = {
-      userId: rawUserId,
-      password: pass,
-      fullName: fullName,
-      phone: phone || '',
-      role: role,
-      status: 'approved',
-      createdAt: new Date().toISOString()
-    };
-
-    // 1. Save locally
-    users.push(newUser);
-    saveRegisteredUsers(users);
-
-    // 2. Add to approved access requests so it is fully tracked
-    const reqs = getAccessRequests();
-    const existingReqIdx = reqs.findIndex(r => (r.userId || '').toLowerCase() === uKey);
-    const approvedReq = {
-      id: 'req-' + Date.now(),
-      userId: rawUserId,
-      password: pass,
-      fullName: fullName,
-      phone: phone || '',
-      role: role,
-      status: 'approved',
-      submittedAt: new Date().toISOString(),
-      reviewedAt: new Date().toISOString()
-    };
-    if (existingReqIdx !== -1) {
-      reqs[existingReqIdx] = approvedReq;
-    } else {
-      reqs.unshift(approvedReq);
-    }
-    saveAccessRequests(reqs);
-
-    // 3. Fast sync to Supabase if connected
-    if (state.isCloud && state.supabase) {
-      try {
-        await withTimeout(
-          state.supabase.from('access_requests').upsert([{
-            user_id_alias: rawUserId,
-            full_name: fullName,
-            phone: phone || '',
-            password_hash: pass,
-            status: 'approved',
-            role: role,
-            reviewed_at: new Date().toISOString()
-          }], { onConflict: 'user_id_alias' }),
-          3000
-        );
-      } catch (err) {
-        console.warn('Could not sync directly added user to Supabase:', err);
-      }
-    }
-
-    submitDirectAddBtn.disabled = false;
-    submitDirectAddBtn.textContent = 'Create Account';
-    closeModal('directAddUserModal');
-    renderAdminDashboard();
-    showToast(`Examinee "${rawUserId}" created and approved! They can now log in.`);
+    try {
+      const {error} = await state.supabase.functions.invoke('manage-candidate',{body:{action:'create',alias:rawUserId,name:fullName,phone,password:pass,role}});
+      if (error) throw error;
+      document.getElementById('directPassword').value = '';
+      closeDirectAddUserModal();
+      await renderAdminDashboard();
+    } catch (err) { fb.textContent = err.message; }
+    finally { submitDirectAddBtn.disabled = false; }
   });
-
-
-
-
-  
 
   document.getElementById('openCloudModalBtn')?.addEventListener('click', () => {
     const config = getSavedCloudConfig();
@@ -29574,7 +28848,7 @@
       const client = window.supabase.createClient(url, key);
       const { error } = await client.from('questions').select('id').limit(1);
 
-      if (error && error.message && error.message.includes('FetchError')) {
+      if (error) {
         throw error;
       }
 
@@ -29599,138 +28873,21 @@
   });
 
   // Schema Modal
-  const SCHEMA_SQL = `-- Supabase Schema for CBLR Rule 6 Exam — Preparation Portal (by Dhruv Gori)
-CREATE TABLE IF NOT EXISTS public.profiles (
-    id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-    email TEXT UNIQUE NOT NULL,
-    full_name TEXT,
-    role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
+  async function schemaText() {
+    const response = await fetch('./supabase_schema.sql');
+    if (!response.ok) throw Error('The database setup file could not be loaded.');
+    return response.text();
+  }
 
-CREATE TABLE IF NOT EXISTS public.questions (
-    id TEXT PRIMARY KEY,
-    act TEXT NOT NULL,
-    chapter TEXT NOT NULL,
-    section TEXT DEFAULT 'General',
-    text TEXT NOT NULL,
-    options JSONB NOT NULL,
-    correct INTEGER NOT NULL,
-    explain TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL
-);
-
-CREATE TABLE IF NOT EXISTS public.exam_attempts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-    user_email TEXT,
-    date TIMESTAMPTZ DEFAULT NOW(),
-    mode TEXT NOT NULL,
-    neg_mode TEXT NOT NULL,
-    total_q INTEGER NOT NULL,
-    correct INTEGER NOT NULL,
-    wrong INTEGER NOT NULL,
-    skipped INTEGER NOT NULL,
-    raw_score NUMERIC NOT NULL,
-    max_score NUMERIC NOT NULL,
-    pass_mark NUMERIC NOT NULL,
-    passed BOOLEAN NOT NULL,
-    filter_used JSONB,
-    per_topic JSONB,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS public.study_materials (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    category TEXT NOT NULL,
-    url TEXT NOT NULL,
-    description TEXT,
-    contributor TEXT DEFAULT 'Contributor',
-    type TEXT DEFAULT 'link',
-    file_format TEXT,
-    file_size TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL
-);
-
--- Row Level Security (RLS)
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.exam_attempts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.study_materials ENABLE ROW LEVEL SECURITY;
-
-CREATE OR REPLACE FUNCTION public.is_admin() RETURNS BOOLEAN AS $$
-BEGIN
-  RETURN EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin');
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Profiles Policies
-CREATE POLICY "Users view own profile" ON public.profiles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Admins view all profiles" ON public.profiles FOR SELECT USING (public.is_admin());
-
--- Questions Policies
-CREATE POLICY "Anyone can view questions" ON public.questions FOR SELECT USING (true);
-CREATE POLICY "Only admins insert questions" ON public.questions FOR INSERT WITH CHECK (public.is_admin());
-CREATE POLICY "Only admins update questions" ON public.questions FOR UPDATE USING (public.is_admin());
-CREATE POLICY "Only admins delete questions" ON public.questions FOR DELETE USING (public.is_admin());
-
--- Exam Attempts Policies
-CREATE POLICY "Candidates view own attempts" ON public.exam_attempts FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Candidates insert own attempts" ON public.exam_attempts FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Candidates delete own attempts" ON public.exam_attempts FOR DELETE USING (auth.uid() = user_id);
-CREATE POLICY "Admins view all attempts" ON public.exam_attempts FOR SELECT USING (public.is_admin());
-CREATE POLICY "Admins delete all attempts" ON public.exam_attempts FOR DELETE USING (public.is_admin());
-
--- Study Materials Policies
-CREATE POLICY "Anyone can view study materials" ON public.study_materials FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can insert study materials" ON public.study_materials FOR INSERT WITH CHECK (auth.role() = 'authenticated');
-CREATE POLICY "Admins can update study materials" ON public.study_materials FOR UPDATE USING (public.is_admin());
-CREATE POLICY "Admins can delete study materials" ON public.study_materials FOR DELETE USING (public.is_admin());
-
--- Access Requests Table & Policies
-CREATE TABLE IF NOT EXISTS public.access_requests (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id_alias TEXT UNIQUE NOT NULL,
-    full_name TEXT NOT NULL,
-    phone TEXT,
-    password_hash TEXT,
-    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
-    role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    reviewed_at TIMESTAMPTZ,
-    reviewed_by UUID REFERENCES auth.users(id)
-);
-ALTER TABLE public.access_requests ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Anyone can submit access request" ON public.access_requests FOR INSERT WITH CHECK (true);
-CREATE POLICY "Users view own or pending requests" ON public.access_requests FOR SELECT USING (true);
-CREATE POLICY "Admins manage all requests" ON public.access_requests FOR ALL USING (public.is_admin());
-
--- Auto-create profile trigger
-CREATE OR REPLACE FUNCTION public.handle_new_user() RETURNS TRIGGER AS $$
-DECLARE first_user BOOLEAN;
-BEGIN
-  SELECT NOT EXISTS (SELECT 1 FROM public.profiles) INTO first_user;
-  INSERT INTO public.profiles (id, email, full_name, role)
-  VALUES (NEW.id, NEW.email, COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
-    CASE WHEN first_user THEN 'admin' ELSE 'user' END);
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();`;
-
-  document.getElementById('viewSchemaModalBtn')?.addEventListener('click', () => {
-    document.getElementById('schemaCodeBox').textContent = SCHEMA_SQL;
+  document.getElementById('viewSchemaModalBtn')?.addEventListener('click', async () => {
+    try { document.getElementById('schemaCodeBox').textContent = await schemaText(); }
+    catch (err) { showToast(err.message); return; }
     document.getElementById('schemaCopyMsg').textContent = '';
     openModal('schemaModal');
   });
 
   document.getElementById('copySchemaBtn')?.addEventListener('click', () => {
-    navigator.clipboard.writeText(SCHEMA_SQL).then(() => {
+    navigator.clipboard.writeText(document.getElementById('schemaCodeBox').textContent).then(() => {
       document.getElementById('schemaCopyMsg').textContent = '✓ Copied to clipboard!';
       showToast("Schema copied to clipboard.");
     });
@@ -29819,29 +28976,17 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
   }
 
   async function addMaterialItem(item) {
+    if (state.isCloud && state.supabase && state.user) {
+      const {error} = await state.supabase.from('study_materials').insert({
+        id:item.id,title:item.title,category:item.category,url:item.url,description:item.description,
+        contributor:item.contributor,type:item.type,file_format:item.file_format,file_size:item.file_size,
+        created_by:state.user.id
+      });
+      if (error) throw error;
+    }
     state.materials.unshift(item);
     saveMaterialsLocally(state.materials);
     renderMaterials();
-
-    if (state.isCloud && state.supabase) {
-      try {
-        const rowToInsert = {
-          id: item.id,
-          title: item.title,
-          category: item.category,
-          url: item.url.startsWith('data:') ? 'Local Stored Document: ' + (item.fileName || item.title) : item.url,
-          description: item.description,
-          contributor: item.contributor,
-          type: item.type,
-          file_format: item.file_format,
-          file_size: item.file_size,
-          created_by: state.user?.id || null
-        };
-        await state.supabase.from('study_materials').upsert([rowToInsert]);
-      } catch (err) {
-        console.warn("Supabase material upload error:", err);
-      }
-    }
   }
 
   async function deleteMaterialItem(id) {
@@ -29854,18 +28999,14 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
 
     if (!confirm(`Delete study material "${state.materials[idx].title}"?`)) return;
 
+    if (state.isCloud && state.supabase) {
+      const {error} = await state.supabase.from('study_materials').delete().eq('id', id);
+      if (error) { showToast(error.message); return; }
+    }
     state.materials.splice(idx, 1);
     saveMaterialsLocally(state.materials);
     renderMaterials();
-    showToast("Material removed from repository.");
-
-    if (state.isCloud && state.supabase) {
-      try {
-        await state.supabase.from('study_materials').delete().eq('id', id);
-      } catch (err) {
-        console.warn("Supabase material delete error:", err);
-      }
-    }
+    showToast('Material removed from repository.');
   }
 
   function renderMaterials() {
@@ -30050,7 +29191,7 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
     openModal('linkShareModal');
   });
 
-  document.getElementById('submitLinkShareBtn')?.addEventListener('click', () => {
+  document.getElementById('submitLinkShareBtn')?.addEventListener('click', async () => {
     const title = (document.getElementById('shareLinkTitle')?.value || '').trim();
     const category = document.getElementById('shareLinkCategory')?.value || 'CBLR 2018';
     let url = (document.getElementById('shareLinkUrl')?.value || '').trim();
@@ -30091,7 +29232,7 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
       date: new Date().toISOString().split('T')[0]
     };
 
-    addMaterialItem(newMaterial);
+    try { await addMaterialItem(newMaterial); } catch (err) { feedback.textContent = err.message; return; }
     closeModal('linkShareModal');
     showToast("Study material link added successfully! 📚");
   });
@@ -30167,7 +29308,7 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
     }
 
     const reader = new FileReader();
-    reader.onload = function(evt) {
+    reader.onload = async function(evt) {
       const dataUrl = evt.target.result;
       const newDoc = {
         id: 'mat-doc-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6),
@@ -30183,7 +29324,7 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
         date: new Date().toISOString().split('T')[0]
       };
 
-      addMaterialItem(newDoc);
+      try { await addMaterialItem(newDoc); } catch (err) { feedback.textContent = err.message; return; }
       closeModal('adminFileUploadModal');
       showToast(`Document "${finalTitle}" uploaded successfully! 📄`);
     };
@@ -30251,66 +29392,14 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
       return;
     }
 
-    const currentUserId = state.profile?.userId;
-    if (!currentUserId) {
-      feedback.textContent = 'No active user session detected.';
-      return;
-    }
-
+    if (!state.user || !state.supabase) { feedback.textContent = 'Sign into your online account to change its password.'; return; }
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Updating...';
-
     try {
-      // 1. Verify and update in local user registry
-      const users = getRegisteredUsers();
-      const user = users.find(u => u.userId.toLowerCase() === currentUserId.toLowerCase());
-
-      if (user) {
-        if (user.password !== currentPass) {
-          feedback.textContent = 'Incorrect current password.';
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Update Password';
-          return;
-        }
-        // Update user password
-        user.password = newPass;
-        saveRegisteredUsers(users);
-      } else {
-        // If not in registry yet (e.g. cloud profile), ensure added
-        users.push({
-          userId: currentUserId,
-          password: newPass,
-          fullName: state.profile.full_name || currentUserId,
-          phone: state.profile.phone || '',
-          role: state.profile.role || 'user',
-          status: 'approved',
-          createdAt: new Date().toISOString()
-        });
-        saveRegisteredUsers(users);
-      }
-
-      // Also update any matching access requests password so admin can view/manage
-      const reqs = getAccessRequests();
-      const matchedReq = reqs.find(r => r.userId.toLowerCase() === currentUserId.toLowerCase());
-      if (matchedReq) {
-        matchedReq.password = newPass;
-        saveAccessRequests(reqs);
-      }
-
-      // 2. If Supabase cloud is active, update cloud auth password
-      if (state.isCloud && state.supabase && state.user) {
-        try {
-          const { error: cloudPassErr } = await state.supabase.auth.updateUser({
-            password: newPass
-          });
-          if (cloudPassErr) {
-            console.warn("Supabase auth password update notice:", cloudPassErr.message);
-          }
-        } catch (cloudErr) {
-          console.warn("Cloud password sync caught exception:", cloudErr);
-        }
-      }
-
+      const auth = state.supabase.auth;
+      const check = await auth.signInWithPassword({email:state.user.email,password:currentPass});
+      if (check.error) throw check.error;
+      const {error} = await auth.updateUser({password:newPass});
+      if (error) throw error;
       feedback.style.color = 'var(--good)';
       feedback.textContent = '✅ Password successfully updated!';
       showToast('Password updated successfully! 🔑');
@@ -30340,7 +29429,7 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
     const ex = state.activeExam;
     if (!ex || document.getElementById('examScreen').style.display === 'none') return;
     const tag = (e.target.tagName || '').toLowerCase();
-    if (['input', 'textarea', 'select', 'button'].includes(tag)) return;
+    if (['input', 'textarea', 'select'].includes(tag)) return;
 
     if (e.key === 'ArrowRight' && ex.current < ex.questions.length - 1) {
       ex.current++;
@@ -30363,23 +29452,40 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
   // Prevent accidental tab close during timed mock
   window.addEventListener('beforeunload', e => {
     if (state.activeExam) {
+      saveDraft();
       e.preventDefault();
       e.returnValue = '';
     }
   });
 
-  function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
-  }
+
 
   // ==========================================================================
   // 18. Initialization
   // ==========================================================================
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
   loadBookmarks();
   updateUserInterface();
-  initSupabase().then(() => loadData());
+  function resumeDraft() {
+    if (state.activeExam || !isLoggedIn() || !draftKey()) return;
+    const raw = localStorage.getItem(draftKey());
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw);
+      if (!draft.questions?.length || !Number.isFinite(draft.deadline)) return;
+      draft.submitting = false;
+      draft.currentQStartSec = Date.now();
+      draft.remaining = Math.max(0, Math.ceil((draft.deadline - Date.now()) / 1000));
+      state.activeExam = draft;
+      openExam();
+      if (!draft.remaining) submitTest();
+    } catch {
+      showToast('Saved exam could not be reopened.');
+    }
+  }
+  initSupabase().then(() => loadData()).then(resumeDraft);
 
 
   // Direct Examinee Provisioning Controller (Admin Only)
@@ -30393,6 +29499,12 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
   }
 
 })();
+  function escapeHtml(value) {
+    const element = document.createElement('div');
+    element.textContent = value ?? '';
+    return element.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
 
   // ==========================================================================
   // ALLIED ACTS & PGAs DATA MATRIX & CONTROLLER
